@@ -23,6 +23,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 's
 
   const { signUp, signIn, signInWithGoogle, resetPassword } = useAuth();
 
+  // Reset mode when modal opens with different initialMode
+  React.useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode);
+      // Reset form and errors when modal opens
+      setFormData({ email: '', password: '', confirmPassword: '', userName: '' });
+      setErrors({});
+      setMessage(null);
+      setShowPassword(false);
+    }
+  }, [isOpen, initialMode]);
+
   if (!isOpen) return null;
 
   const validateForm = () => {
