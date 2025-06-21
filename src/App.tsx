@@ -73,7 +73,7 @@ function App() {
               } 
             />
             
-            {/* Auth Callback */}
+            {/* Auth Callback - This handles Google OAuth redirects */}
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
             
             {/* Additional navigation routes */}

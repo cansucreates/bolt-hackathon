@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Eye, EyeOff, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLocation } from 'react-router-dom';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -22,9 +23,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 's
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const { signUp, signIn, signInWithGoogle, resetPassword } = useAuth();
+  const location = useLocation();
 
   // Reset mode when modal opens with different initialMode
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       setMode(initialMode);
       // Reset form and errors when modal opens
@@ -34,6 +36,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 's
       setShowPassword(false);
     }
   }, [isOpen, initialMode]);
+
+  // Check for auth messages from navigation state
+  useEffect(() => {
+    if (location.state?.authError) {
+      setMessage({ type: 'error', text: location.state.authError });
+      // Clear the state to prevent showing the message again
+      window.history.replaceState({}, document.title);
+    } else if (location.state?.authSuccess) {
+      setMessage({ type: 'success', text: location.state.authSuccess });
+      // Clear the state to prevent showing the message again
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   if (!isOpen) return null;
 
@@ -128,14 +143,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 's
       
       if (error) {
         setMessage({ type: 'error', text: error.message });
+        setIsLoading(false);
       }
-      // Note: Google OAuth will redirect, so we don't close the modal here
+      // Note: For successful Google OAuth, the user will be redirected
+      // so we don't need to handle the success case here
     } catch (error) {
       setMessage({ 
         type: 'error', 
         text: 'Failed to sign in with Google. Please try again.' 
       });
-    } finally {
       setIsLoading(false);
     }
   };
