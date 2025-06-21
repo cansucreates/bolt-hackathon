@@ -9,6 +9,7 @@ const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [authMessage, setAuthMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
   const { user, profile, signOut } = useAuth();
   
@@ -23,6 +24,37 @@ const Header: React.FC = () => {
     
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Check for auth messages from URL state
+  useEffect(() => {
+    const checkAuthMessages = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const authSuccess = urlParams.get('auth_success');
+      const authError = urlParams.get('auth_error');
+      
+      if (authSuccess) {
+        setAuthMessage({ type: 'success', text: decodeURIComponent(authSuccess) });
+        // Clean up URL
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('auth_success');
+        window.history.replaceState({}, '', newUrl.toString());
+        
+        // Clear message after 5 seconds
+        setTimeout(() => setAuthMessage(null), 5000);
+      } else if (authError) {
+        setAuthMessage({ type: 'error', text: decodeURIComponent(authError) });
+        // Clean up URL
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('auth_error');
+        window.history.replaceState({}, '', newUrl.toString());
+        
+        // Clear message after 5 seconds
+        setTimeout(() => setAuthMessage(null), 5000);
+      }
+    };
+
+    checkAuthMessages();
   }, []);
 
   // Enhanced mobile navigation handler with background overlay control
@@ -224,9 +256,29 @@ const Header: React.FC = () => {
   
   return (
     <>
+      {/* Auth Message Banner */}
+      {authMessage && (
+        <div className={`fixed top-0 left-0 right-0 z-[60] p-4 text-center font-quicksand ${
+          authMessage.type === 'success' 
+            ? 'bg-green-100 border-b border-green-200 text-green-800' 
+            : 'bg-red-100 border-b border-red-200 text-red-800'
+        }`}>
+          <div className="flex items-center justify-center gap-2">
+            <span>{authMessage.text}</span>
+            <button 
+              onClick={() => setAuthMessage(null)}
+              className="ml-2 text-lg font-bold hover:opacity-70"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out
-                  ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-md' : 'bg-transparent'}`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
+          authMessage ? 'mt-16' : ''
+        } ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-md' : 'bg-transparent'}`}
       >
         <div className="kawaii-container py-3 sm:py-4">
           <div className="flex items-center justify-between min-h-[60px] sm:min-h-[64px]">

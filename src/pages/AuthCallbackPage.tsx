@@ -14,7 +14,11 @@ const AuthCallbackPage: React.FC = () => {
         setIsProcessing(true);
         setError(null);
 
-        // Handle the auth callback from Supabase
+        console.log('Auth callback page loaded, processing authentication...');
+        console.log('Current URL:', window.location.href);
+        console.log('URL search params:', window.location.search);
+
+        // Handle the OAuth callback by exchanging the code for a session
         const { data, error: authError } = await supabase.auth.getSession();
         
         if (authError) {
@@ -29,30 +33,91 @@ const AuthCallbackPage: React.FC = () => {
                 authError: 'Authentication failed. Please try again.' 
               } 
             });
-          }, 3000);
+          }, 2000);
           return;
         }
 
         if (data.session) {
           // Successfully authenticated
-          console.log('Authentication successful:', data.session.user.email);
+          console.log('Authentication successful for user:', data.session.user.email);
           
-          // Check if there's a redirect URL in the state
-          const redirectTo = location.state?.from?.pathname || '/';
+          // Show success message briefly before redirecting
+          setIsProcessing(false);
           
-          // Small delay to ensure the auth context is updated
+          // Redirect to home page after a short delay
           setTimeout(() => {
-            navigate(redirectTo, { 
+            navigate('/', { 
               replace: true,
               state: { 
-                authSuccess: 'Successfully signed in!' 
+                authSuccess: `Welcome back, ${data.session.user.email}!` 
               }
             });
-          }, 1000);
+          }, 1500);
         } else {
-          // No session found - this might be a failed auth attempt
-          console.warn('No session found in auth callback');
-          setError('No authentication session found.');
+          // No session found - try to handle the OAuth callback manually
+          console.log('No session found, attempting to handle OAuth callback...');
+          
+          // Check if we have OAuth parameters in the URL
+          const urlParams = new URLSearchParams(window.location.search);
+          const code = urlParams.get('code');
+          const error_code = urlParams.get('error');
+          const error_description = urlParams.get('error_description');
+
+          if (error_code) {
+            console.error('OAuth error:', error_code, error_description);
+            setError(`Authentication failed: ${error_description || error_code}`);
+            
+            setTimeout(() => {
+              navigate('/', { 
+                replace: true,
+                state: { 
+                  authError: `Authentication failed: ${error_description || 'Please try again.'}` 
+                }
+              });
+            }, 2000);
+            return;
+          }
+
+          if (code) {
+            console.log('Found OAuth code, exchanging for session...');
+            
+            // Exchange the code for a session
+            const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
+            
+            if (sessionError) {
+              console.error('Error exchanging code for session:', sessionError);
+              setError('Failed to complete authentication. Please try again.');
+              
+              setTimeout(() => {
+                navigate('/', { 
+                  replace: true,
+                  state: { 
+                    authError: 'Failed to complete authentication. Please try again.' 
+                  }
+                });
+              }, 2000);
+              return;
+            }
+
+            if (sessionData.session) {
+              console.log('Successfully exchanged code for session:', sessionData.session.user.email);
+              setIsProcessing(false);
+              
+              setTimeout(() => {
+                navigate('/', { 
+                  replace: true,
+                  state: { 
+                    authSuccess: `Welcome, ${sessionData.session.user.email}!` 
+                  }
+                });
+              }, 1500);
+              return;
+            }
+          }
+
+          // If we get here, something went wrong
+          console.warn('No session or OAuth code found in callback');
+          setError('Authentication session not found.');
           
           setTimeout(() => {
             navigate('/', { 
@@ -61,7 +126,7 @@ const AuthCallbackPage: React.FC = () => {
                 authError: 'Authentication session not found. Please try again.' 
               }
             });
-          }, 3000);
+          }, 2000);
         }
       } catch (error) {
         console.error('Unexpected error during auth callback:', error);
@@ -74,16 +139,16 @@ const AuthCallbackPage: React.FC = () => {
               authError: 'An unexpected error occurred. Please try again.' 
             }
           });
-        }, 3000);
+        }, 2000);
       } finally {
-        setIsProcessing(false);
+        if (isProcessing) {
+          setIsProcessing(false);
+        }
       }
     };
 
-    // Only run the callback handler if we're actually on the callback page
-    if (location.pathname === '/auth/callback') {
-      handleAuthCallback();
-    }
+    // Run the callback handler
+    handleAuthCallback();
   }, [navigate, location]);
 
   if (error) {

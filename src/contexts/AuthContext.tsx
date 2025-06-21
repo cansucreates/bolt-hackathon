@@ -165,6 +165,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Get the current origin for the redirect URL
       const redirectTo = `${window.location.origin}/auth/callback`;
       
+      console.log('Initiating Google OAuth with redirect to:', redirectTo);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -178,11 +180,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (error) {
         console.error('Google sign-in error:', error);
+        setLoading(false);
         return { error: { message: error.message, status: 400 } };
       }
 
       // Note: For OAuth, the actual authentication happens via redirect
       // so we don't set loading to false here - it will be handled by the callback
+      console.log('Google OAuth initiated successfully');
       return { error: null };
     } catch (error) {
       setLoading(false);
