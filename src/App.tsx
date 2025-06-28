@@ -5,6 +5,7 @@ import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import LostFoundPage from './pages/LostFoundPage';
+import LostFoundRegistryPage from './pages/LostFoundRegistryPage';
 import CrowdfundingPage from './pages/CrowdfundingPage';
 import AdoptionPage from './pages/AdoptionPage';
 import VetPage from './pages/VetPage';
@@ -57,6 +58,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/lost-found" element={<LostFoundPage />} />
+            <Route path="/lost-found/registry" element={<LostFoundRegistryPage />} />
             <Route path="/crowdfunding" element={<CrowdfundingPage />} />
             <Route path="/adoption" element={<AdoptionPage />} />
             <Route path="/vets" element={<VetPage />} />

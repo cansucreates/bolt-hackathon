@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, PawPrint as Paw, Search, MessageCircle, Map, Users, Heart, User, LogIn, UserPlus, DollarSign } from 'lucide-react';
+import { Menu, X, PawPrint as Paw, Search, MessageCircle, Map, Users, Heart, User, LogIn, UserPlus, DollarSign, Database } from 'lucide-react';
 import { Link } from '../navigation/Link';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthModal from '../auth/AuthModal';
@@ -296,6 +296,7 @@ const Header: React.FC = () => {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-2 xl:space-x-3">
               <NavItem to="/lost-found" icon={<Search size={16} />} onClick={closeMenu}>Lost & Found</NavItem>
+              <NavItem to="/lost-found/registry" icon={<Database size={16} />} onClick={closeMenu}>Pet Registry</NavItem>
               <NavItem to="/crowdfunding" icon={<DollarSign size={16} />} onClick={closeMenu}>Crowdfunding</NavItem>
               <NavItem to="/adoption" icon={<Heart size={16} />} onClick={closeMenu}>Adoption</NavItem>
               <NavItem to="/vets" icon={<Map size={16} />} onClick={closeMenu}>Find Vets</NavItem>
@@ -406,6 +407,9 @@ const Header: React.FC = () => {
         <div className="p-4 sm:p-6 space-y-3 sm:space-y-4 overflow-y-auto h-full pb-24">
           <MobileNavItem to="/lost-found" icon={<Search size={18} />} onClick={handleMobileNavigation}>
             Lost & Found
+          </MobileNavItem>
+          <MobileNavItem to="/lost-found/registry" icon={<Database size={18} />} onClick={handleMobileNavigation}>
+            Pet Registry
           </MobileNavItem>
           <MobileNavItem to="/crowdfunding" icon={<DollarSign size={18} />} onClick={handleMobileNavigation}>
             Crowdfunding
