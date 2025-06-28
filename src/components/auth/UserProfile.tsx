@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Mail, Calendar, Edit3, Save, X, Camera, LogOut } from 'lucide-react';
+import { User, Mail, Calendar, Edit3, Save, X, Camera, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const UserProfile: React.FC = () => {
@@ -155,7 +155,7 @@ const UserProfile: React.FC = () => {
               ) : (
                 <div>
                   <h3 className="text-2xl font-bold text-gray-800">{profile.user_name || 'Anonymous User'}</h3>
-                  <p className="text-gray-600 font-quicksand">PawConnect Member</p>
+                  <p className="text-gray-600 font-quicksand">PawBackHome Member</p>
                 </div>
               )}
             </div>
@@ -199,7 +199,7 @@ const UserProfile: React.FC = () => {
 
           {/* Activity Stats */}
           <div className="bg-kawaii-yellow/20 rounded-kawaii p-6">
-            <h4 className="text-lg font-bold text-gray-800 mb-4">Your PawConnect Activity</h4>
+            <h4 className="text-lg font-bold text-gray-800 mb-4">Your PawBackHome Activity</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-kawaii-pink-dark">0</div>
