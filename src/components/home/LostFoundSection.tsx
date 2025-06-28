@@ -109,13 +109,26 @@ const LostFoundSection: React.FC = () => {
 
   // Enhanced "Help Pet Get Home" button handler
   const handleHelpPetGetHome = () => {
-    // Store image data in sessionStorage for transfer
     if (uploadedImage) {
+      // Store image data in sessionStorage for transfer
       sessionStorage.setItem('transferredPetImage', uploadedImage);
+      
+      // Navigate to registry page with found pet form and auto-open
+      window.location.href = '/lost-found/registry?type=found&autoOpen=true';
+    } else {
+      // If no image uploaded, just go to the registry page
+      window.location.href = '/lost-found/registry?type=found&autoOpen=true';
     }
-    
-    // Navigate to registry page with found pet form
-    window.location.href = '/lost-found/registry?type=found&autoOpen=true';
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
   };
 
   return (
