@@ -107,6 +107,17 @@ const LostFoundSection: React.FC = () => {
     }
   };
 
+  // Enhanced "Help Pet Get Home" button handler
+  const handleHelpPetGetHome = () => {
+    // Store image data in sessionStorage for transfer
+    if (uploadedImage) {
+      sessionStorage.setItem('transferredPetImage', uploadedImage);
+    }
+    
+    // Navigate to registry page with found pet form
+    window.location.href = '/lost-found/registry?type=found&autoOpen=true';
+  };
+
   return (
     <section id="lost-found-section" className="py-16 relative scroll-mt-20">
       <div className="kawaii-container">
@@ -154,7 +165,7 @@ const LostFoundSection: React.FC = () => {
                     Search Lost Pets
                   </Button>
                 </Link>
-                <Link to="/lost-found/registry" className="flex-1">
+                <Link to="/lost-found/registry?type=lost&autoOpen=true" className="flex-1">
                   <Button 
                     variant="blue" 
                     icon={<Upload size={18} />}
@@ -191,7 +202,7 @@ const LostFoundSection: React.FC = () => {
                 />
 
                 {uploadedImage ? (
-                  /* Image Preview */
+                  /* Image Preview with improved scaling */
                   <div className="relative border-2 border-kawaii-green rounded-kawaii p-4 bg-kawaii-green/10">
                     <button
                       onClick={removeImage}
@@ -203,7 +214,7 @@ const LostFoundSection: React.FC = () => {
                     <img
                       src={uploadedImage}
                       alt="Uploaded pet"
-                      className="w-full h-48 object-cover rounded-kawaii mb-3"
+                      className="w-full h-48 object-contain rounded-kawaii mb-3 bg-white"
                     />
                     {uploadSuccess && (
                       <div className="flex items-center justify-center gap-2 text-green-600 font-semibold">
@@ -274,23 +285,20 @@ const LostFoundSection: React.FC = () => {
                 )}
               </div>
 
-              {/* Single button that links to registry */}
+              {/* Enhanced "Help Pet Get Home" button */}
               <div className="w-full mt-auto">
-                <Link to="/lost-found/registry" className="w-full">
-                  <Button 
-                    variant="green" 
-                    className="w-full justify-center"
-                    aria-label="Help pet get home by reporting to our registry"
-                  >
-                    Help Pet Get Home
-                  </Button>
-                </Link>
+                <button
+                  onClick={handleHelpPetGetHome}
+                  className="w-full bg-kawaii-green hover:bg-kawaii-green-dark text-gray-700 font-bold py-3 px-6 rounded-kawaii transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-md"
+                  aria-label="Help pet get home by reporting to our registry"
+                >
+                  <Heart size={18} />
+                  Help Pet Get Home
+                </button>
               </div>
             </div>
           </Card>
         </div>
-        
-        {/* Removed the pet cards grid section for testing */}
         
         <div className="text-center mt-8">
           <Link to="/lost-found/registry">

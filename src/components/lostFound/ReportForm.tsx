@@ -8,22 +8,24 @@ interface ReportFormProps {
   type: 'lost' | 'found';
   onSuccess: () => void;
   onCancel: () => void;
+  initialImageData?: string; // Add support for pre-uploaded images
 }
 
-const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) => {
+const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, initialImageData }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState<PetReportData>({
     type,
     pet_name: '',
     description: '',
-    photo_url: '',
+    photo_url: initialImageData || '',
     location: '',
     contact_info: ''
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string>(initialImageData || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -46,9 +48,9 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
       return;
     }
 
-    // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setErrors(prev => ({ ...prev, image: 'Image size must be less than 5MB' }));
+    // Validate file size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setErrors(prev => ({ ...prev, image: 'Image size must be less than 10MB' }));
       return;
     }
 
@@ -87,6 +89,14 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
 
     if (!formData.contact_info.trim()) {
       newErrors.contact_info = 'Contact information is required';
+    } else {
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+      
+      if (!emailRegex.test(formData.contact_info) && !phoneRegex.test(formData.contact_info.replace(/[\s\-\(\)]/g, ''))) {
+        newErrors.contact_info = 'Please enter a valid email address or phone number';
+      }
     }
 
     if (!imageFile && !formData.photo_url) {
@@ -109,7 +119,10 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
       return;
     }
 
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      setMessage({ type: 'error', text: 'Please fix the errors above before submitting' });
+      return;
+    }
 
     setIsSubmitting(true);
     setMessage(null);
@@ -120,7 +133,23 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
       // Upload image if a new file is selected
       if (imageFile) {
         setIsUploading(true);
+        setUploadProgress(0);
+        
+        // Simulate upload progress
+        const progressInterval = setInterval(() => {
+          setUploadProgress(prev => {
+            if (prev >= 90) {
+              clearInterval(progressInterval);
+              return 90;
+            }
+            return prev + 10;
+          });
+        }, 200);
+
         const uploadResult = await uploadPetImage(imageFile);
+        
+        clearInterval(progressInterval);
+        setUploadProgress(100);
         setIsUploading(false);
 
         if (uploadResult.error) {
@@ -141,30 +170,49 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
       if (result.error) {
         setMessage({ type: 'error', text: result.error });
       } else {
-        setMessage({ type: 'success', text: 'Report submitted successfully! 🏡 Helping this pet get back home.' });
+        setMessage({ 
+          type: 'success', 
+          text: `${type === 'lost' ? 'Lost' : 'Found'} pet report submitted successfully! 🏡 Helping this pet get back home.` 
+        });
+        
+        // Clear form
+        setFormData({
+          type,
+          pet_name: '',
+          description: '',
+          photo_url: '',
+          location: '',
+          contact_info: ''
+        });
+        setImageFile(null);
+        setImagePreview('');
+        
         setTimeout(() => {
           onSuccess();
-        }, 1500);
+        }, 2000);
       }
     } catch (error) {
+      console.error('Submission error:', error);
       setMessage({ type: 'error', text: 'An unexpected error occurred. Please try again.' });
     } finally {
       setIsSubmitting(false);
       setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-white/90 backdrop-blur-sm rounded-kawaii shadow-kawaii border-2 border-kawaii-pink/30 p-6">
+    <div className="max-w-2xl mx-auto bg-white/90 backdrop-blur-sm rounded-kawaii shadow-kawaii border-2 border-kawaii-pink/30 p-4 sm:p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
           Report {type === 'lost' ? 'Lost' : 'Found'} Pet
         </h2>
         <button
           onClick={onCancel}
-          className="p-2 hover:bg-gray-100 rounded-kawaii transition-colors duration-200"
+          className="p-2 hover:bg-gray-100 rounded-kawaii transition-colors duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center"
+          aria-label="Close form"
         >
-          <X size={24} className="text-gray-600" />
+          <X size={20} className="text-gray-600" />
         </button>
       </div>
 
@@ -180,11 +228,11 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
           ) : (
             <AlertTriangle size={20} className="flex-shrink-0" />
           )}
-          <span>{message.text}</span>
+          <span className="text-sm sm:text-base">{message.text}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Pet Name (required for lost pets) */}
         {type === 'lost' && (
           <div>
@@ -202,7 +250,10 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
               />
             </div>
             {errors.pet_name && (
-              <p className="text-red-600 text-sm mt-1">{errors.pet_name}</p>
+              <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                <AlertTriangle size={12} />
+                {errors.pet_name}
+              </p>
             )}
           </div>
         )}
@@ -218,12 +269,13 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
               <img 
                 src={imagePreview} 
                 alt="Pet preview"
-                className="w-full h-64 object-cover rounded-kawaii border-2 border-kawaii-pink/30"
+                className="w-full h-48 sm:h-64 object-contain rounded-kawaii border-2 border-kawaii-pink/30 bg-gray-50"
               />
               <button
                 type="button"
                 onClick={removeImage}
-                className="absolute top-2 right-2 p-2 bg-red-100 hover:bg-red-200 rounded-full transition-colors duration-200"
+                className="absolute top-2 right-2 p-2 bg-red-100 hover:bg-red-200 rounded-full transition-colors duration-200 min-w-[36px] min-h-[36px] flex items-center justify-center"
+                aria-label="Remove image"
               >
                 <X size={16} className="text-red-600" />
               </button>
@@ -231,14 +283,14 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
           ) : (
             <div 
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-kawaii-pink rounded-kawaii p-8 text-center bg-kawaii-pink/10 hover:bg-kawaii-pink/20 transition-colors duration-300 cursor-pointer"
+              className="border-2 border-dashed border-kawaii-pink rounded-kawaii p-6 sm:p-8 text-center bg-kawaii-pink/10 hover:bg-kawaii-pink/20 transition-colors duration-300 cursor-pointer"
             >
-              <Camera size={48} className="text-kawaii-pink-dark mx-auto mb-4" />
-              <p className="text-gray-700 font-quicksand font-semibold mb-2">
+              <Camera size={32} className="text-kawaii-pink-dark mx-auto mb-4 sm:w-12 sm:h-12" />
+              <p className="text-gray-700 font-quicksand font-semibold mb-2 text-sm sm:text-base">
                 Click to upload pet photo
               </p>
-              <p className="text-sm text-gray-600">
-                JPG, PNG, WEBP (max 5MB)
+              <p className="text-xs sm:text-sm text-gray-600">
+                JPG, PNG, WEBP (max 10MB)
               </p>
             </div>
           )}
@@ -251,8 +303,27 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
             className="hidden"
           />
           
+          {/* Upload Progress */}
+          {isUploading && (
+            <div className="mt-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-600">Uploading...</span>
+                <span className="text-sm text-gray-600">{uploadProgress}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-kawaii-blue-dark h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
+          
           {errors.image && (
-            <p className="text-red-600 text-sm mt-1">{errors.image}</p>
+            <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+              <AlertTriangle size={12} />
+              {errors.image}
+            </p>
           )}
         </div>
 
@@ -272,7 +343,10 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
             />
           </div>
           {errors.location && (
-            <p className="text-red-600 text-sm mt-1">{errors.location}</p>
+            <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+              <AlertTriangle size={12} />
+              {errors.location}
+            </p>
           )}
         </div>
 
@@ -284,17 +358,17 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
           <textarea
             value={formData.description}
             onChange={(e) => handleInputChange('description', e.target.value)}
-            className={`kawaii-input w-full h-32 resize-none ${errors.description ? 'border-red-300' : ''}`}
+            className={`kawaii-input w-full h-24 sm:h-32 resize-none ${errors.description ? 'border-red-300' : ''}`}
             placeholder={`Describe the pet's appearance, behavior, and any other relevant details...`}
             maxLength={500}
           />
           <div className="flex justify-between items-center mt-1">
             {errors.description ? (
-              <p className="text-red-600 text-sm">{errors.description}</p>
+              <p className="text-red-600 text-xs">{errors.description}</p>
             ) : (
-              <p className="text-gray-500 text-sm">Minimum 10 characters</p>
+              <p className="text-gray-500 text-xs">Minimum 10 characters</p>
             )}
-            <p className="text-gray-500 text-sm">{formData.description.length}/500</p>
+            <p className="text-gray-500 text-xs">{formData.description.length}/500</p>
           </div>
         </div>
 
@@ -314,23 +388,26 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
             />
           </div>
           {errors.contact_info && (
-            <p className="text-red-600 text-sm mt-1">{errors.contact_info}</p>
+            <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+              <AlertTriangle size={12} />
+              {errors.contact_info}
+            </p>
           )}
         </div>
 
         {/* Submit Buttons */}
-        <div className="flex gap-4 pt-4">
+        <div className="flex flex-col sm:flex-row gap-3 pt-4">
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 py-3 px-6 border border-gray-300 rounded-kawaii text-gray-700 font-bold hover:bg-gray-50 transition-colors duration-200"
+            className="flex-1 py-3 px-6 border border-gray-300 rounded-kawaii text-gray-700 font-bold hover:bg-gray-50 transition-colors duration-200 min-h-[48px]"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting || isUploading}
-            className={`flex-1 py-3 px-6 rounded-kawaii font-bold transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-md ${
+            className={`flex-1 py-3 px-6 rounded-kawaii font-bold transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-md min-h-[48px] ${
               type === 'lost'
                 ? 'bg-kawaii-coral hover:bg-kawaii-coral/80 text-gray-700'
                 : 'bg-kawaii-green hover:bg-kawaii-green-dark text-gray-700'

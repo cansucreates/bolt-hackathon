@@ -70,7 +70,7 @@ const ReportCard: React.FC<ReportCardProps> = ({ report, onUpdate }) => {
       report.status === 'resolved' ? 'opacity-75' : ''
     }`}>
       
-      {/* Image Container */}
+      {/* Image Container with improved scaling */}
       <div className="relative overflow-hidden rounded-t-kawaii">
         <div className="aspect-video bg-gray-200 relative">
           {!imageLoaded && (
@@ -81,7 +81,7 @@ const ReportCard: React.FC<ReportCardProps> = ({ report, onUpdate }) => {
           <img
             src={report.photo_url}
             alt={report.pet_name || 'Pet photo'}
-            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${
+            className={`w-full h-full object-contain bg-white transition-all duration-500 group-hover:scale-105 ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={() => setImageLoaded(true)}

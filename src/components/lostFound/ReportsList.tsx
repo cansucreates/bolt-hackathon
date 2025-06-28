@@ -11,6 +11,7 @@ const ReportsList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [formType, setFormType] = useState<'lost' | 'found'>('lost');
+  const [transferredImage, setTransferredImage] = useState<string>('');
   const [filters, setFilters] = useState<ReportFilters>({
     type: 'all',
     status: 'active',
@@ -18,6 +19,31 @@ const ReportsList: React.FC = () => {
     location: ''
   });
   const [showFilters, setShowFilters] = useState(false);
+
+  // Check for URL parameters and transferred image data
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const type = urlParams.get('type') as 'lost' | 'found';
+    const autoOpen = urlParams.get('autoOpen') === 'true';
+    
+    // Check for transferred image data
+    const transferredImageData = sessionStorage.getItem('transferredPetImage');
+    if (transferredImageData) {
+      setTransferredImage(transferredImageData);
+      sessionStorage.removeItem('transferredPetImage'); // Clean up
+    }
+    
+    if (type && autoOpen) {
+      setFormType(type);
+      setShowForm(true);
+      
+      // Clean up URL parameters
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('type');
+      newUrl.searchParams.delete('autoOpen');
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+  }, []);
 
   const loadReports = async () => {
     setLoading(true);
@@ -78,6 +104,7 @@ const ReportsList: React.FC = () => {
 
   const handleFormSuccess = () => {
     setShowForm(false);
+    setTransferredImage(''); // Clear transferred image
     loadReports();
   };
 
@@ -213,7 +240,11 @@ const ReportsList: React.FC = () => {
           <ReportForm
             type={formType}
             onSuccess={handleFormSuccess}
-            onCancel={() => setShowForm(false)}
+            onCancel={() => {
+              setShowForm(false);
+              setTransferredImage(''); // Clear transferred image on cancel
+            }}
+            initialImageData={transferredImage}
           />
         </div>
       </div>

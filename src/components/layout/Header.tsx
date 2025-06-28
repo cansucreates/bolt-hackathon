@@ -282,19 +282,20 @@ const Header: React.FC = () => {
       >
         <div className="kawaii-container py-3 sm:py-4">
           <div className="flex items-center justify-between min-h-[60px] sm:min-h-[64px]">
-            {/* Logo - Clean paw icon only */}
-            <Link to="/" className="flex items-center space-x-2 flex-shrink-0 mr-8 lg:mr-12" onClick={closeMenu}>
+            {/* Logo - Fixed responsive dimensions */}
+            <Link to="/" className="flex items-center space-x-2 flex-shrink-0 mr-4 lg:mr-8" onClick={closeMenu}>
               <div className="relative">
                 <Paw 
-                  size={28} 
-                  className="text-kawaii-pink-dark fill-kawaii-pink-dark animate-pulse sm:w-8 sm:h-8" 
+                  className="text-kawaii-pink-dark fill-kawaii-pink-dark animate-pulse w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9 xl:w-10 xl:h-10" 
                 />
               </div>
-              <span className="text-xl sm:text-2xl font-bold text-gray-700 whitespace-nowrap">PawBackHome</span>
+              <span className="font-bold text-gray-700 whitespace-nowrap text-base sm:text-lg md:text-xl lg:text-2xl xl:text-2xl leading-tight">
+                PawBackHome
+              </span>
             </Link>
             
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-2 xl:space-x-3">
+            <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2 2xl:space-x-3">
               <NavItem to="/lost-found" icon={<Search size={16} />} onClick={closeMenu}>Lost & Found</NavItem>
               <NavItem to="/lost-found/registry" icon={<Database size={16} />} onClick={closeMenu}>Pet Registry</NavItem>
               <NavItem to="/crowdfunding" icon={<DollarSign size={16} />} onClick={closeMenu}>Crowdfunding</NavItem>
@@ -304,16 +305,16 @@ const Header: React.FC = () => {
               <NavItem to="/community" icon={<Users size={16} />} onClick={closeMenu}>Community</NavItem>
               
               {/* Auth Section */}
-              <div className="flex items-center space-x-2 ml-4 xl:ml-6 pl-4 xl:pl-6 border-l border-gray-200">
+              <div className="flex items-center space-x-1 xl:space-x-2 ml-2 xl:ml-4 pl-2 xl:pl-4 border-l border-gray-200">
                 {user ? (
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1 xl:space-x-2">
                     <Link to="/profile" onClick={closeMenu}>
-                      <div className="flex items-center gap-2 px-3 xl:px-4 py-2 hover:bg-kawaii-pink/30 rounded-kawaii transition-colors duration-300">
+                      <div className="flex items-center gap-1 xl:gap-2 px-2 xl:px-3 py-2 hover:bg-kawaii-pink/30 rounded-kawaii transition-colors duration-300">
                         {profile?.avatar_url ? (
                           <img 
                             src={profile.avatar_url} 
                             alt="Profile"
-                            className="w-6 h-6 rounded-full object-cover"
+                            className="w-5 h-5 xl:w-6 xl:h-6 rounded-full object-cover"
                           />
                         ) : (
                           <User size={16} />
@@ -325,7 +326,7 @@ const Header: React.FC = () => {
                     </Link>
                     <button 
                       onClick={handleSignOut}
-                      className="px-3 xl:px-4 py-2 text-gray-700 hover:text-kawaii-pink-dark font-semibold transition-colors duration-300 text-sm xl:text-base"
+                      className="px-2 xl:px-3 py-2 text-gray-700 hover:text-kawaii-pink-dark font-semibold transition-colors duration-300 text-sm xl:text-base"
                     >
                       Sign Out
                     </button>
@@ -334,14 +335,14 @@ const Header: React.FC = () => {
                   <>
                     <button 
                       onClick={() => openAuthModal('signin')}
-                      className="px-3 xl:px-4 py-2 text-gray-700 hover:text-kawaii-pink-dark font-semibold transition-colors duration-300 flex items-center gap-1 xl:gap-2 text-sm xl:text-base whitespace-nowrap"
+                      className="px-2 xl:px-3 py-2 text-gray-700 hover:text-kawaii-pink-dark font-semibold transition-colors duration-300 flex items-center gap-1 text-sm xl:text-base whitespace-nowrap"
                     >
                       <LogIn size={16} />
                       Sign In
                     </button>
                     <button 
                       onClick={() => openAuthModal('signup')}
-                      className="kawaii-button flex items-center gap-1 xl:gap-2 text-sm xl:text-base px-3 xl:px-4 py-2 whitespace-nowrap"
+                      className="kawaii-button flex items-center gap-1 text-sm xl:text-base px-2 xl:px-3 py-2 whitespace-nowrap"
                     >
                       <UserPlus size={16} />
                       Sign Up
@@ -390,7 +391,7 @@ const Header: React.FC = () => {
         <div className="p-4 sm:p-6 border-b border-kawaii-pink/30 bg-kawaii-pink/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Paw size={20} className="text-kawaii-pink-dark fill-kawaii-pink-dark sm:w-6 sm:h-6" />
+              <Paw className="text-kawaii-pink-dark fill-kawaii-pink-dark w-5 h-5 sm:w-6 sm:h-6" />
               <span className="text-base sm:text-lg font-bold text-gray-700">PawBackHome</span>
             </div>
             <button 
@@ -518,7 +519,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, children, onClick }) => {
   return (
     <Link 
       to={to} 
-      className="px-2 xl:px-3 py-2 rounded-full text-gray-700 hover:bg-kawaii-pink/50 transition-all duration-300 flex items-center space-x-1 text-sm xl:text-base font-medium whitespace-nowrap"
+      className="px-1 xl:px-2 2xl:px-3 py-2 rounded-full text-gray-700 hover:bg-kawaii-pink/50 transition-all duration-300 flex items-center space-x-1 text-sm xl:text-base font-medium whitespace-nowrap"
       onClick={onClick}
     >
       {icon}
