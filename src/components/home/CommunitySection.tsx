@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, Heart, Clock, Users, MapPin } from 'lucide-react';
+import { MessageCircle, Heart, Clock, Users, MapPin, Home } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 
@@ -8,11 +8,15 @@ const CommunitySection: React.FC = () => {
     <section className="py-16 bg-gradient-to-b from-kawaii-purple/10 via-kawaii-pink/10 to-transparent">
       <div className="kawaii-container">
         <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Users size={32} className="text-kawaii-purple-dark" />
+            <Home size={28} className="text-kawaii-pink-dark" />
+          </div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
             Join Our Pet-Loving Community
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Connect with fellow animal lovers, share stories, and get advice from our friendly community
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto font-quicksand">
+            Connect with fellow animal lovers, share stories, and get advice from our friendly PawBackHome community
           </p>
         </div>
         
@@ -23,7 +27,7 @@ const CommunitySection: React.FC = () => {
               <h3 className="text-2xl font-bold text-gray-800 mb-4">
                 Community Forums
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 mb-6 font-quicksand">
                 Join discussions on pet care, training tips, and share your own experiences
               </p>
               <div className="space-y-4 flex-grow">
@@ -57,14 +61,14 @@ const CommunitySection: React.FC = () => {
               <h3 className="text-2xl font-bold text-gray-800 mb-4">
                 Community Feed
               </h3>
-              <p className="text-gray-600 mb-6">
-                See what's happening in the PawConnect community
+              <p className="text-gray-600 mb-6 font-quicksand">
+                See what's happening in the PawBackHome community
               </p>
               <div className="space-y-4 flex-grow">
                 <CommunityPost 
                   username="Sarah_PetLover"
                   time="15 minutes ago"
-                  content="Just found this beautiful cat wandering around Main Street. No collar, very friendly. Anyone recognize this cutie?"
+                  content="Just found this beautiful cat wandering around Main Street. No collar, very friendly. Anyone recognize this cutie? Let's help them get back home!"
                   imageUrl="https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg"
                   likes={24}
                   comments={8}
@@ -72,7 +76,7 @@ const CommunitySection: React.FC = () => {
                 <CommunityPost 
                   username="MaxDogTrainer"
                   time="2 hours ago"
-                  content="Success story! After 6 weeks of training, Luna finally mastered the 'stay' command!"
+                  content="Success story! After 6 weeks of training, Luna finally mastered the 'stay' command and is ready to go back home!"
                   likes={46}
                   comments={12}
                 />
@@ -91,7 +95,7 @@ const CommunitySection: React.FC = () => {
               <h3 className="text-2xl font-bold text-gray-800 mb-4">
                 Upcoming Events
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 mb-6 font-quicksand">
                 Join local pet events and volunteer opportunities
               </p>
               <div className="space-y-4 flex-grow">
@@ -217,7 +221,7 @@ const CommunityPost: React.FC<CommunityPostProps> = ({
           <p className="text-xs text-gray-500">{time}</p>
         </div>
       </div>
-      <p className="text-gray-700 mb-3">{content}</p>
+      <p className="text-gray-700 mb-3 font-quicksand">{content}</p>
       {imageUrl && (
         <div className="mb-3">
           <img 

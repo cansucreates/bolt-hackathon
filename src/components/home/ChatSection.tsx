@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageCircle, Send, PawPrint as Paw } from 'lucide-react';
+import { MessageCircle, Send, PawPrint as Paw, Home } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 
@@ -10,11 +10,15 @@ const ChatSection: React.FC = () => {
     <section className="py-16 bg-kawaii-purple/20">
       <div className="kawaii-container">
         <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <MessageCircle size={32} className="text-kawaii-purple-dark" />
+            <Home size={28} className="text-kawaii-pink-dark" />
+          </div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
             Get Expert Vet Advice
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Chat with our AI vet assistant or connect with real veterinarians for pet health questions
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto font-quicksand">
+            Chat with our AI vet assistant or connect with real veterinarians for pet health questions through PawBackHome
           </p>
         </div>
         
@@ -25,10 +29,10 @@ const ChatSection: React.FC = () => {
                 <div className="flex space-x-2 items-center mb-4">
                   <Paw size={20} className="text-kawaii-purple-dark" />
                   <h3 className="font-bold text-gray-800">
-                    AI Vet Assistant
+                    PawBackHome AI Assistant
                   </h3>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-gray-600 font-quicksand">
                   Ask me any basic pet health questions! I can help with common concerns, but remember to always consult with a real veterinarian for serious health issues.
                 </p>
               </div>
@@ -73,7 +77,7 @@ const ChatSection: React.FC = () => {
               </div>
               
               <div className="mt-6 text-center">
-                <p className="text-gray-500 text-sm mb-4">
+                <p className="text-gray-500 text-sm mb-4 font-quicksand">
                   Need to speak with a real veterinarian?
                 </p>
                 <Button 
@@ -87,7 +91,7 @@ const ChatSection: React.FC = () => {
           </Card>
           
           <div className="text-center mt-8">
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600 mb-4 font-quicksand">
               Remember, online advice is not a substitute for professional veterinary care
             </p>
             <Button variant="green">
