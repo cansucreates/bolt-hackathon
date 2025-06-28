@@ -11,13 +11,15 @@ export default {
         'kawaii-green': '#D8FFE6',
         'kawaii-green-dark': '#B6FFDA',
         'kawaii-yellow': '#FFF8D6',
-        'kawaii-yellow-dark': '#F59E0B', // Changed from #FFECB6 to a more vibrant amber
+        'kawaii-yellow-dark': '#F97316', // Changed to vibrant orange
         'kawaii-purple': '#EBD6FF',
         'kawaii-purple-dark': '#DEB6FF',
         'kawaii-coral': '#FFDEDE',
         'kawaii-mint': '#B6FFDA',
-        'kawaii-orange': '#FB923C', // Added for home icons
-        'kawaii-orange-dark': '#EA580C', // Added for better contrast
+        'kawaii-orange': '#FB923C', // Soft coral for home icons
+        'kawaii-orange-dark': '#EA580C', // Deeper coral for contrast
+        'kawaii-peach': '#FECACA', // Added soft peach for variety
+        'kawaii-peach-dark': '#F87171', // Deeper peach
       },
       fontFamily: {
         'kawaii': ['Nunito', 'Comic Sans MS', 'sans-serif'],
