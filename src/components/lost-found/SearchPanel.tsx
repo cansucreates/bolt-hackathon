@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Search, MapPin, Upload, Heart, PawPrint } from 'lucide-react';
+import { Search, Upload, Heart, PawPrint } from 'lucide-react';
+import { Link } from '../navigation/Link';
 import { SearchFilters } from '../../types/pet';
 
 interface SearchPanelProps {
@@ -27,7 +28,8 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSearch, onReportPet }) => {
   };
 
   const handleSubmitReport = () => {
-    onReportPet(reportType);
+    // Redirect to the registry page instead of opening modal
+    window.location.href = '/lost-found/registry';
   };
 
   return (
@@ -79,13 +81,12 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSearch, onReportPet }) => {
                 </div>
 
                 <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
                   <input
                     type="text"
                     placeholder="Location (city, neighborhood...)"
                     value={filters.location}
                     onChange={(e) => handleFilterChange('location', e.target.value)}
-                    className="kawaii-input pl-12 w-full"
+                    className="kawaii-input w-full"
                   />
                 </div>
 
@@ -164,57 +165,44 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ onSearch, onReportPet }) => {
                   </div>
                 </div>
 
-                {/* Quick Info Fields */}
-                <div className="space-y-4 flex-grow">
-                  <input
-                    type="text"
-                    placeholder="Pet name (if known)"
-                    className="kawaii-input w-full"
-                  />
-                  
-                  <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
-                    <input
-                      type="text"
-                      placeholder="Location where lost/found"
-                      className="kawaii-input pl-12 w-full"
-                    />
+                {/* Quick Info Text */}
+                <div className="flex-grow flex items-center justify-center">
+                  <div className="text-center p-6 bg-kawaii-yellow/20 rounded-kawaii border border-kawaii-yellow/30">
+                    <h4 className="text-lg font-bold text-gray-800 mb-2">
+                      Ready to help a pet get home?
+                    </h4>
+                    <p className="text-gray-600 font-quicksand mb-4">
+                      Use our comprehensive Pet Registry to submit detailed reports with photos, location, and contact information.
+                    </p>
+                    <p className="text-sm text-gray-500 font-quicksand">
+                      🏡 "Send every paw back home."
+                    </p>
                   </div>
-
-                  <textarea
-                    placeholder="Brief description of the pet..."
-                    className="kawaii-input w-full h-24 resize-none"
-                  />
-
-                  <input
-                    type="email"
-                    placeholder="Your contact email"
-                    className="kawaii-input w-full"
-                  />
                 </div>
 
                 {/* Single Submit Report Button */}
                 <div className="mt-auto">
-                  <button
-                    onClick={handleSubmitReport}
-                    className={`kawaii-button font-bold py-4 px-6 rounded-kawaii shadow-kawaii transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 w-full ${
-                      reportType === 'lost'
-                        ? 'bg-kawaii-coral hover:bg-kawaii-coral/80 text-gray-700'
-                        : 'bg-kawaii-green hover:bg-kawaii-green-dark text-gray-700'
-                    }`}
-                  >
-                    {reportType === 'lost' ? (
-                      <>
-                        <PawPrint size={20} />
-                        Submit Lost Pet Report
-                      </>
-                    ) : (
-                      <>
-                        <Heart size={20} />
-                        Submit Found Pet Report
-                      </>
-                    )}
-                  </button>
+                  <Link to="/lost-found/registry" className="w-full">
+                    <button
+                      className={`kawaii-button font-bold py-4 px-6 rounded-kawaii shadow-kawaii transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 w-full ${
+                        reportType === 'lost'
+                          ? 'bg-kawaii-coral hover:bg-kawaii-coral/80 text-gray-700'
+                          : 'bg-kawaii-green hover:bg-kawaii-green-dark text-gray-700'
+                      }`}
+                    >
+                      {reportType === 'lost' ? (
+                        <>
+                          <PawPrint size={20} />
+                          Report Lost Pet
+                        </>
+                      ) : (
+                        <>
+                          <Heart size={20} />
+                          Report Found Pet
+                        </>
+                      )}
+                    </button>
+                  </Link>
                 </div>
               </div>
             </div>

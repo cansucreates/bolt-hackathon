@@ -141,7 +141,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
       if (result.error) {
         setMessage({ type: 'error', text: result.error });
       } else {
-        setMessage({ type: 'success', text: 'Report submitted successfully!' });
+        setMessage({ type: 'success', text: 'Report submitted successfully! 🏡 Helping this pet get back home.' });
         setTimeout(() => {
           onSuccess();
         }, 1500);
@@ -286,6 +286,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel }) =>
             onChange={(e) => handleInputChange('description', e.target.value)}
             className={`kawaii-input w-full h-32 resize-none ${errors.description ? 'border-red-300' : ''}`}
             placeholder={`Describe the pet's appearance, behavior, and any other relevant details...`}
+            maxLength={500}
           />
           <div className="flex justify-between items-center mt-1">
             {errors.description ? (

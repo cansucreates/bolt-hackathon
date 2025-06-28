@@ -3,18 +3,37 @@ import { PetReport, PetReportData, ReportFilters, ImageUploadResult } from '../t
 
 // Image compression utility
 const compressImage = (file: File, maxWidth: number = 800, quality: number = 0.8): Promise<Blob> => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
+    const ctx = canvas.getContext('2d');
     const img = new Image();
     
+    if (!ctx) {
+      reject(new Error('Canvas context not available'));
+      return;
+    }
+    
     img.onload = () => {
-      const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
-      canvas.width = img.width * ratio;
-      canvas.height = img.height * ratio;
-      
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(resolve, 'image/jpeg', quality);
+      try {
+        const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('Failed to compress image'));
+          }
+        }, 'image/jpeg', quality);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    img.onerror = () => {
+      reject(new Error('Failed to load image'));
     };
     
     img.src = URL.createObjectURL(file);
@@ -33,14 +52,20 @@ export const uploadPetImage = async (file: File): Promise<ImageUploadResult> => 
       return { url: '', error: 'Image size must be less than 5MB' };
     }
 
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { url: '', error: 'You must be logged in to upload images' };
+    }
+
     // Compress image
     const compressedBlob = await compressImage(file);
-    const compressedFile = new File([compressedBlob!], file.name, { type: 'image/jpeg' });
+    const compressedFile = new File([compressedBlob], file.name, { type: 'image/jpeg' });
 
-    // Generate unique filename
+    // Generate unique filename with user folder
     const fileExt = 'jpg';
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const filePath = `pet-reports/${fileName}`;
+    const filePath = `${user.id}/${fileName}`;
 
     // Upload to Supabase Storage
     const { data, error } = await supabase.storage

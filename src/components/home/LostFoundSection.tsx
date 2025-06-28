@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Upload, Heart, Home } from 'lucide-react';
+import { Link } from '../navigation/Link';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -42,21 +43,25 @@ const LostFoundSection: React.FC = () => {
                 />
               </div>
               
-              {/* Aligned button container to match "Found a Pet?" section */}
+              {/* Action buttons that link to registry */}
               <div className="flex flex-col sm:flex-row gap-4 w-full mt-auto">
-                <Button 
-                  variant="primary" 
-                  className="flex-1 justify-center"
-                >
-                  Search Lost Pets
-                </Button>
-                <Button 
-                  variant="blue" 
-                  icon={<Upload size={18} />}
-                  className="flex-1 justify-center"
-                >
-                  Report Lost Pet
-                </Button>
+                <Link to="/lost-found/registry" className="flex-1">
+                  <Button 
+                    variant="primary" 
+                    className="w-full justify-center"
+                  >
+                    Search Lost Pets
+                  </Button>
+                </Link>
+                <Link to="/lost-found/registry" className="flex-1">
+                  <Button 
+                    variant="blue" 
+                    icon={<Upload size={18} />}
+                    className="w-full justify-center"
+                  >
+                    Report Lost Pet
+                  </Button>
+                </Link>
               </div>
             </div>
           </Card>
@@ -80,14 +85,16 @@ const LostFoundSection: React.FC = () => {
                 </div>
               </div>
               
-              {/* Single button aligned to match the two-button layout spacing */}
+              {/* Single button that links to registry */}
               <div className="w-full mt-auto">
-                <Button 
-                  variant="green" 
-                  className="w-full justify-center"
-                >
-                  Help Pet Get Home
-                </Button>
+                <Link to="/lost-found/registry" className="w-full">
+                  <Button 
+                    variant="green" 
+                    className="w-full justify-center"
+                  >
+                    Help Pet Get Home
+                  </Button>
+                </Link>
               </div>
             </div>
           </Card>
@@ -124,9 +131,11 @@ const LostFoundSection: React.FC = () => {
         </div>
         
         <div className="text-center mt-8">
-          <Button variant="primary">
-            View All Pets
-          </Button>
+          <Link to="/lost-found/registry">
+            <Button variant="primary">
+              View All Reports
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
@@ -173,12 +182,14 @@ const PetCard: React.FC<PetCardProps> = ({
           <p>{location}</p>
           <p>{date}</p>
         </div>
-        <Button 
-          variant={type === 'Lost' ? 'primary' : 'green'}
-          className="w-full justify-center"
-        >
-          {type === 'Lost' ? 'I Found This Pet' : 'Help Get Home'}
-        </Button>
+        <Link to="/lost-found/registry" className="w-full">
+          <Button 
+            variant={type === 'Lost' ? 'primary' : 'green'}
+            className="w-full justify-center"
+          >
+            {type === 'Lost' ? 'I Found This Pet' : 'Help Get Home'}
+          </Button>
+        </Link>
       </div>
     </Card>
   );
