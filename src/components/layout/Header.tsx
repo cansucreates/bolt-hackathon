@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, PawPrint as Paw, Search, MessageCircle, Map, Users, Heart, User, LogIn, UserPlus, DollarSign, Home } from 'lucide-react';
+import { Menu, X, PawPrint as Paw, Search, MessageCircle, Map, Users, Heart, User, LogIn, UserPlus, DollarSign } from 'lucide-react';
 import { Link } from '../navigation/Link';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthModal from '../auth/AuthModal';
@@ -282,16 +282,13 @@ const Header: React.FC = () => {
       >
         <div className="kawaii-container py-3 sm:py-4">
           <div className="flex items-center justify-between min-h-[60px] sm:min-h-[64px]">
-            {/* Logo - Enhanced with home icon */}
+            {/* Logo - Clean paw icon only */}
             <Link to="/" className="flex items-center space-x-2 flex-shrink-0 mr-8 lg:mr-12" onClick={closeMenu}>
               <div className="relative">
                 <Paw 
                   size={28} 
                   className="text-kawaii-pink-dark fill-kawaii-pink-dark animate-pulse sm:w-8 sm:h-8" 
                 />
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-kawaii-lavender rounded-full flex items-center justify-center">
-                  <Home size={10} className="text-kawaii-lavender-dark" />
-                </div>
               </div>
               <span className="text-xl sm:text-2xl font-bold text-gray-700 whitespace-nowrap">PawBackHome</span>
             </Link>

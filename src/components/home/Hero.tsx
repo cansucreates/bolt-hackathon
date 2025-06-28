@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Search, MapPin, Users, Home } from 'lucide-react';
+import { Heart, Search, MapPin, Users } from 'lucide-react';
 import Button from '../ui/Button';
 
 const Hero: React.FC = () => {
@@ -8,16 +8,10 @@ const Hero: React.FC = () => {
       <div className="kawaii-container pt-8 md:pt-16 text-center px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <div className="inline-block relative mb-4">
-            <div className="flex items-center gap-2">
-              <Heart 
-                size={24} 
-                className="inline-block text-kawaii-pink-dark fill-kawaii-pink-dark animate-pulse sm:h-8 sm:w-8" 
-              />
-              <Home 
-                size={20} 
-                className="inline-block text-kawaii-lavender-dark fill-kawaii-lavender-dark sm:h-6 sm:w-6" 
-              />
-            </div>
+            <Heart 
+              size={24} 
+              className="inline-block text-kawaii-pink-dark fill-kawaii-pink-dark animate-pulse sm:h-8 sm:w-8" 
+            />
             <span className="kawaii-floating inline-block relative">
               <span className="absolute -top-2 -right-2 transform rotate-12">
                 <Heart size={12} className="text-kawaii-pink-dark fill-kawaii-pink-dark sm:h-4 sm:w-4" />

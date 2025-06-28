@@ -1,5 +1,5 @@
 import React from 'react';
-import { PawPrint as Paw, Mail, Instagram, Twitter, Facebook, Home } from 'lucide-react';
+import { PawPrint as Paw, Mail, Instagram, Twitter, Facebook } from 'lucide-react';
 import { Link } from '../navigation/Link';
 
 const Footer: React.FC = () => {
@@ -10,15 +10,10 @@ const Footer: React.FC = () => {
           {/* Logo and Description */}
           <div className="md:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="relative">
-                <Paw 
-                  size={32} 
-                  className="text-kawaii-pink-dark fill-kawaii-pink-dark" 
-                />
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-kawaii-lavender rounded-full flex items-center justify-center">
-                  <Home size={10} className="text-kawaii-lavender-dark" />
-                </div>
-              </div>
+              <Paw 
+                size={32} 
+                className="text-kawaii-pink-dark fill-kawaii-pink-dark" 
+              />
               <span className="text-2xl font-bold text-gray-700">PawBackHome</span>
             </div>
             <p className="text-gray-600 mb-4 font-quicksand">
