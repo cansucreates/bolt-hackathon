@@ -290,35 +290,7 @@ const LostFoundSection: React.FC = () => {
           </Card>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <PetCard 
-            name="Fluffy"
-            type="Lost"
-            species="Dog"
-            breed="Golden Retriever"
-            location="Central Park, New York"
-            date="Sep 15, 2025"
-            imageUrl="https://images.pexels.com/photos/1490908/pexels-photo-1490908.jpeg"
-          />
-          <PetCard 
-            name="Unknown"
-            type="Found"
-            species="Cat"
-            breed="Tabby"
-            location="Main Street, Boston"
-            date="Sep 16, 2025"
-            imageUrl="https://images.pexels.com/photos/2061057/pexels-photo-2061057.jpeg"
-          />
-          <PetCard 
-            name="Max"
-            type="Lost"
-            species="Dog"
-            breed="Corgi"
-            location="Riverfront Park, Chicago"
-            date="Sep 14, 2025"
-            imageUrl="https://images.pexels.com/photos/1629781/pexels-photo-1629781.jpeg"
-          />
-        </div>
+        {/* Removed the pet cards grid section for testing */}
         
         <div className="text-center mt-8">
           <Link to="/lost-found/registry">
@@ -332,60 +304,6 @@ const LostFoundSection: React.FC = () => {
         </div>
       </div>
     </section>
-  );
-};
-
-type PetCardProps = {
-  name: string;
-  type: 'Lost' | 'Found';
-  species: string;
-  breed: string;
-  location: string;
-  date: string;
-  imageUrl: string;
-};
-
-const PetCard: React.FC<PetCardProps> = ({
-  name,
-  type,
-  species,
-  breed,
-  location,
-  date,
-  imageUrl
-}) => {
-  return (
-    <Card hover>
-      <div className="relative">
-        <img 
-          src={imageUrl} 
-          alt={`${type} ${species} - ${breed}`}
-          className="w-full h-48 object-cover rounded-t-kawaii"
-        />
-        <span className={`absolute top-3 right-3 text-sm font-bold py-1 px-3 rounded-full ${
-          type === 'Lost' ? 'bg-kawaii-pink' : 'bg-kawaii-green'
-        }`}>
-          {type}
-        </span>
-      </div>
-      <div className="p-4">
-        <h3 className="text-xl font-bold text-gray-800 mb-1">{name}</h3>
-        <p className="text-gray-600 mb-2">{species} - {breed}</p>
-        <div className="text-sm text-gray-500 mb-4">
-          <p>{location}</p>
-          <p>{date}</p>
-        </div>
-        <Link to="/lost-found/registry" className="w-full">
-          <Button 
-            variant={type === 'Lost' ? 'primary' : 'green'}
-            className="w-full justify-center"
-            aria-label={type === 'Lost' ? 'Report that you found this pet' : 'Help this pet get home'}
-          >
-            {type === 'Lost' ? 'I Found This Pet' : 'Help Get Home'}
-          </Button>
-        </Link>
-      </div>
-    </Card>
   );
 };
 
