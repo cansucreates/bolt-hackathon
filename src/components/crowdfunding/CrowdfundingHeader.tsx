@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Coins } from 'lucide-react';
+import { Heart, Coins, Home } from 'lucide-react';
 
 const CrowdfundingHeader: React.FC = () => {
   return (
@@ -8,13 +8,16 @@ const CrowdfundingHeader: React.FC = () => {
         {/* Bouncing Coins Icon */}
         <div className="mb-8">
           <div className="inline-block bouncing-paw">
-            <Coins size={64} className="text-kawaii-yellow-dark" />
+            <div className="flex items-center gap-2">
+              <Coins size={64} className="text-kawaii-yellow-dark" />
+              <Home size={48} className="text-kawaii-pink-dark" />
+            </div>
           </div>
         </div>
 
         {/* Main Heading */}
         <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gradient">
-          💰 Help Our Furry Friends
+          💰 Help Our Furry Friends Get Home
         </h1>
 
         {/* Subtitle */}
@@ -26,9 +29,16 @@ const CrowdfundingHeader: React.FC = () => {
           </span>
         </h2>
 
+        {/* Slogan */}
+        <div className="mt-4 mb-6">
+          <p className="text-2xl md:text-3xl font-bold text-kawaii-pink-dark font-quicksand">
+            🏡 "Send every paw back home."
+          </p>
+        </div>
+
         {/* Description */}
         <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto font-quicksand">
-          Support animals in need with medical care, rescue operations, and finding forever homes. Your contribution makes a real difference in their lives.
+          Support animals in need with medical care, rescue operations, and finding forever homes. Your contribution through PawBackHome makes a real difference in their lives.
         </p>
 
         {/* Quick Stats */}
@@ -43,7 +53,7 @@ const CrowdfundingHeader: React.FC = () => {
           </div>
           <div className="bg-white/80 backdrop-blur-sm rounded-kawaii p-4 border border-kawaii-pink/30">
             <div className="text-2xl font-bold text-kawaii-pink-dark">1,856</div>
-            <div className="text-sm text-gray-600 font-quicksand">Kind Donors</div>
+            <div className="text-sm text-gray-600 font-quicksand">Paws Sent Home</div>
           </div>
         </div>
       </div>

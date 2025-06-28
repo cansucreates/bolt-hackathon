@@ -1,5 +1,5 @@
 import React from 'react';
-import { PawPrint as Paw, Mail, Instagram, Twitter, Facebook } from 'lucide-react';
+import { PawPrint as Paw, Mail, Instagram, Twitter, Facebook, Home } from 'lucide-react';
 import { Link } from '../navigation/Link';
 
 const Footer: React.FC = () => {
@@ -9,15 +9,20 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and Description */}
           <div className="md:col-span-1">
-            <div className="flex items-center space-x-2">
-              <Paw 
-                size={32} 
-                className="text-kawaii-pink-dark fill-kawaii-pink-dark" 
-              />
-              <span className="text-2xl font-bold text-gray-700">PawConnect</span>
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="relative">
+                <Paw 
+                  size={32} 
+                  className="text-kawaii-pink-dark fill-kawaii-pink-dark" 
+                />
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-kawaii-yellow rounded-full flex items-center justify-center">
+                  <Home size={10} className="text-gray-700" />
+                </div>
+              </div>
+              <span className="text-2xl font-bold text-gray-700">PawBackHome</span>
             </div>
-            <p className="mt-4 text-gray-600">
-              Helping lost pets find their way home and connecting animal lovers worldwide.
+            <p className="text-gray-600 mb-4 font-quicksand">
+              🏡 Send every paw back home. Helping lost pets find their way home and connecting animal lovers worldwide.
             </p>
             <div className="mt-6 flex space-x-4">
               <SocialLink icon={<Facebook size={20} />} href="#" />
@@ -66,11 +71,11 @@ const Footer: React.FC = () => {
         </div>
         
         <div className="mt-12 pt-6 border-t border-kawaii-pink text-center">
-          <p className="text-gray-600 flex items-center justify-center">
-            Made with love for all our furry friends
+          <p className="text-gray-600 flex items-center justify-center gap-2 font-quicksand">
+            Made with love to send every paw back home 🏡💕
           </p>
           <p className="mt-2 text-sm text-gray-500">
-            © {new Date().getFullYear()} PawConnect. All rights reserved.
+            © {new Date().getFullYear()} PawBackHome. All rights reserved.
           </p>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import UserProfile from '../components/auth/UserProfile';
+import { Home } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
   return (
@@ -21,11 +22,21 @@ const ProfilePage: React.FC = () => {
       <div className="relative z-10 pt-24 pb-16">
         {/* Header */}
         <div className="max-w-4xl mx-auto px-4 text-center mb-8">
+          <div className="mb-6">
+            <div className="inline-block bouncing-paw">
+              <div className="flex items-center gap-2">
+                <Home size={48} className="text-kawaii-pink-dark" />
+              </div>
+            </div>
+          </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gradient">
             👤 My Profile
           </h1>
-          <p className="text-xl text-gray-700 font-quicksand max-w-2xl mx-auto">
-            Manage your account settings and view your PawConnect activity
+          <p className="text-xl text-gray-700 font-quicksand max-w-2xl mx-auto mb-4">
+            Manage your account settings and view your PawBackHome activity
+          </p>
+          <p className="text-2xl md:text-3xl font-bold text-kawaii-yellow-dark font-quicksand">
+            🏡 "Send every paw back home."
           </p>
         </div>
 

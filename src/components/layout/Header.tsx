@@ -282,15 +282,18 @@ const Header: React.FC = () => {
       >
         <div className="kawaii-container py-3 sm:py-4">
           <div className="flex items-center justify-between min-h-[60px] sm:min-h-[64px]">
-            {/* Logo - Increased left margin to distinguish from nav items */}
+            {/* Logo - Enhanced with home icon */}
             <Link to="/" className="flex items-center space-x-2 flex-shrink-0 mr-8 lg:mr-12" onClick={closeMenu}>
               <div className="relative">
                 <Paw 
                   size={28} 
                   className="text-kawaii-pink-dark fill-kawaii-pink-dark animate-pulse sm:w-8 sm:h-8" 
                 />
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-kawaii-yellow rounded-full flex items-center justify-center">
+                  <span className="text-xs">🏡</span>
+                </div>
               </div>
-              <span className="text-xl sm:text-2xl font-bold text-gray-700 whitespace-nowrap">PawConnect</span>
+              <span className="text-xl sm:text-2xl font-bold text-gray-700 whitespace-nowrap">PawBackHome</span>
             </Link>
             
             {/* Desktop Navigation */}
@@ -390,7 +393,7 @@ const Header: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Paw size={20} className="text-kawaii-pink-dark fill-kawaii-pink-dark sm:w-6 sm:h-6" />
-              <span className="text-base sm:text-lg font-bold text-gray-700">Menu</span>
+              <span className="text-base sm:text-lg font-bold text-gray-700">PawBackHome</span>
             </div>
             <button 
               onClick={closeMenu}

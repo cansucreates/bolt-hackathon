@@ -8,7 +8,10 @@ const AdoptionHeader: React.FC = () => {
         {/* Bouncing Home Icon */}
         <div className="mb-8">
           <div className="inline-block bouncing-paw">
-            <Home size={64} className="text-kawaii-pink-dark fill-kawaii-pink-dark" />
+            <div className="flex items-center gap-2">
+              <Home size={64} className="text-kawaii-pink-dark fill-kawaii-pink-dark" />
+              <Heart size={48} className="text-kawaii-yellow-dark fill-kawaii-yellow-dark" />
+            </div>
           </div>
         </div>
 
@@ -28,7 +31,7 @@ const AdoptionHeader: React.FC = () => {
 
         {/* Description */}
         <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto font-quicksand">
-          Every pet deserves a loving family. Browse our adorable animals ready for adoption and give them the forever home they've been dreaming of.
+          Every pet deserves a loving family. Browse our adorable animals ready for adoption and give them the forever home they've been dreaming of with PawBackHome.
         </p>
       </div>
     </div>

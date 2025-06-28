@@ -1,5 +1,5 @@
 import React from 'react';
-import { Stethoscope, Heart } from 'lucide-react';
+import { Stethoscope, Heart, Home } from 'lucide-react';
 
 const VetHeader: React.FC = () => {
   return (
@@ -8,7 +8,10 @@ const VetHeader: React.FC = () => {
         {/* Bouncing Stethoscope Icon */}
         <div className="mb-8">
           <div className="inline-block bouncing-paw">
-            <Stethoscope size={64} className="text-kawaii-blue-dark" />
+            <div className="flex items-center gap-2">
+              <Stethoscope size={64} className="text-kawaii-blue-dark" />
+              <Home size={48} className="text-kawaii-pink-dark" />
+            </div>
           </div>
         </div>
 
@@ -26,9 +29,16 @@ const VetHeader: React.FC = () => {
           </span>
         </h2>
 
+        {/* Slogan */}
+        <div className="mt-4 mb-6">
+          <p className="text-2xl md:text-3xl font-bold text-kawaii-yellow-dark font-quicksand">
+            🏡 "Send every paw back home."
+          </p>
+        </div>
+
         {/* Description */}
         <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto font-quicksand">
-          Connect with qualified veterinarians in your area for emergency care, routine checkups, and specialized treatments for your beloved pets.
+          Connect with qualified veterinarians in your area for emergency care, routine checkups, and specialized treatments for your beloved pets through PawBackHome.
         </p>
       </div>
     </div>

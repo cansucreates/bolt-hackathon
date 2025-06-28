@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Search, MapPin, Users } from 'lucide-react';
+import { Heart, Search, MapPin, Users, Home } from 'lucide-react';
 import Button from '../ui/Button';
 
 const Hero: React.FC = () => {
@@ -8,10 +8,16 @@ const Hero: React.FC = () => {
       <div className="kawaii-container pt-8 md:pt-16 text-center px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <div className="inline-block relative mb-4">
-            <Heart 
-              size={24} 
-              className="inline-block text-kawaii-pink-dark fill-kawaii-pink-dark mr-2 animate-pulse sm:h-8 sm:w-8" 
-            />
+            <div className="flex items-center gap-2">
+              <Heart 
+                size={24} 
+                className="inline-block text-kawaii-pink-dark fill-kawaii-pink-dark animate-pulse sm:h-8 sm:w-8" 
+              />
+              <Home 
+                size={20} 
+                className="inline-block text-kawaii-yellow-dark fill-kawaii-yellow-dark sm:h-6 sm:w-6" 
+              />
+            </div>
             <span className="kawaii-floating inline-block relative">
               <span className="absolute -top-2 -right-2 transform rotate-12">
                 <Heart size={12} className="text-kawaii-pink-dark fill-kawaii-pink-dark sm:h-4 sm:w-4" />
@@ -20,13 +26,18 @@ const Hero: React.FC = () => {
           </div>
           
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-4 md:mb-6 leading-tight">
-            Helping Lost Pets Find Their
-            <span className="text-kawaii-pink-dark"> Fur-ever</span> Home
+            Send Every Paw
+            <span className="text-kawaii-pink-dark"> Back Home</span>
           </h1>
           
-          <p className="text-lg sm:text-xl text-gray-600 mb-6 md:mb-8 max-w-2xl mx-auto px-4 sm:px-0">
-            Connect with a community of animal lovers to help lost pets, find adoption opportunities, and support animal welfare with our platform!
-          </p>
+          <div className="mb-6 md:mb-8">
+            <p className="text-2xl md:text-3xl font-bold text-kawaii-yellow-dark mb-2 font-quicksand">
+              🏡 "Send every paw back home."
+            </p>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-4 sm:px-0 font-quicksand">
+              Connect with a community of animal lovers to help lost pets find their way home, support adoption, and provide care for animals in need.
+            </p>
+          </div>
           
           <div className="flex flex-col sm:flex-row gap-3 justify-center px-4 sm:px-0">
             <Button 

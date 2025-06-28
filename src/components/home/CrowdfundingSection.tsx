@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, DollarSign, ArrowRight, Coins } from 'lucide-react';
+import { Heart, DollarSign, ArrowRight, Coins, Home } from 'lucide-react';
 import { Link } from '../navigation/Link';
 import { Campaign } from '../../types/crowdfunding';
 
@@ -10,7 +10,7 @@ const featuredCampaigns: Campaign[] = [
     animalName: 'Luna',
     species: 'dog',
     image: 'https://images.pexels.com/photos/1490908/pexels-photo-1490908.jpeg',
-    story: 'Luna needs urgent surgery after being hit by a car. This brave golden retriever is fighting for her life and needs our help.',
+    story: 'Luna needs urgent surgery after being hit by a car. This brave golden retriever is fighting for her life and needs our help to get back home safely.',
     location: 'Austin, TX',
     goalAmount: 5000,
     currentAmount: 3200,
@@ -30,7 +30,7 @@ const featuredCampaigns: Campaign[] = [
     animalName: 'Whiskers',
     species: 'cat',
     image: 'https://images.pexels.com/photos/2061057/pexels-photo-2061057.jpeg',
-    story: 'Whiskers was found with severe malnutrition and needs specialized care to recover. Help us give this sweet cat a second chance.',
+    story: 'Whiskers was found with severe malnutrition and needs specialized care to recover. Help us give this sweet cat a second chance to find their way back home.',
     location: 'Portland, OR',
     goalAmount: 2500,
     currentAmount: 1800,
@@ -50,7 +50,7 @@ const featuredCampaigns: Campaign[] = [
     animalName: 'Buddy',
     species: 'dog',
     image: 'https://images.pexels.com/photos/1629781/pexels-photo-1629781.jpeg',
-    story: 'Buddy is a senior dog who needs ongoing medical care for his arthritis. Your support helps him live comfortably in his golden years.',
+    story: 'Buddy is a senior dog who needs ongoing medical care for his arthritis. Your support helps him live comfortably while we work to get him back home.',
     location: 'Denver, CO',
     goalAmount: 3000,
     currentAmount: 2100,
@@ -119,14 +119,17 @@ const CrowdfundingSection: React.FC = () => {
         <div className="text-center mb-12">
           <div className="mb-6">
             <div className="inline-block bouncing-paw">
-              <Heart size={48} className="text-kawaii-yellow-dark fill-kawaii-yellow-dark" />
+              <div className="flex items-center gap-2">
+                <Heart size={48} className="text-kawaii-yellow-dark fill-kawaii-yellow-dark" />
+                <Home size={32} className="text-kawaii-pink-dark" />
+              </div>
             </div>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-            Help Our Furry Friends 🐾
+            Help Our Furry Friends Get Home 🐾
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto font-quicksand">
-            Every donation brings hope and healing to animals in need
+            Every donation brings hope and healing to animals in need, helping them on their journey back home
           </p>
         </div>
 
@@ -213,7 +216,7 @@ const CrowdfundingSection: React.FC = () => {
                           {/* Donate Button */}
                           <button className="w-full py-3 px-6 bg-kawaii-yellow hover:bg-kawaii-yellow-dark text-gray-700 font-bold rounded-kawaii transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-md">
                             <DollarSign size={20} />
-                            Donate Now
+                            Help Get Home
                           </button>
                         </div>
                       </div>
@@ -263,7 +266,7 @@ const CrowdfundingSection: React.FC = () => {
           </div>
           <div className="text-center p-4 bg-white/60 backdrop-blur-sm rounded-kawaii border border-kawaii-pink/30">
             <div className="text-2xl font-bold text-kawaii-pink-dark mb-1">1,856</div>
-            <div className="text-sm text-gray-600 font-quicksand">Kind Donors</div>
+            <div className="text-sm text-gray-600 font-quicksand">Paws Sent Home</div>
           </div>
         </div>
       </div>

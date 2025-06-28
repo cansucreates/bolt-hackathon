@@ -14,7 +14,8 @@ import {
   CreditCard,
   MapPin,
   User,
-  Shield
+  Shield,
+  Home
 } from 'lucide-react';
 
 interface Message {
@@ -132,7 +133,7 @@ const VetChatPage: React.FC = () => {
           content: response,
           timestamp: new Date(),
           sender: {
-            name: 'AI Vet Assistant',
+            name: 'PawBackHome AI Assistant',
             avatar: '🤖'
           }
         };
@@ -183,7 +184,7 @@ const VetChatPage: React.FC = () => {
     const welcomeMessage: Message = {
       id: Date.now().toString(),
       type: 'vet',
-      content: `Hello! I'm ${selectedVet?.name}. I'm here to help with your pet's health concerns. Please describe what's happening with your pet and I'll do my best to assist you.`,
+      content: `Hello! I'm ${selectedVet?.name}. I'm here to help with your pet's health concerns and get them back to feeling their best. Please describe what's happening with your pet and I'll do my best to assist you.`,
       timestamp: new Date(),
       sender: {
         name: selectedVet?.name || '',
@@ -300,14 +301,20 @@ const VetChatPage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 text-center mb-12">
           <div className="mb-8">
             <div className="inline-block bouncing-paw">
-              <MessageCircle size={64} className="text-kawaii-blue-dark" />
+              <div className="flex items-center gap-2">
+                <MessageCircle size={64} className="text-kawaii-blue-dark" />
+                <Home size={48} className="text-kawaii-pink-dark" />
+              </div>
             </div>
           </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gradient">
             💬 Veterinary Chat
           </h1>
-          <p className="text-xl text-gray-700 font-quicksand max-w-2xl mx-auto">
+          <p className="text-xl text-gray-700 font-quicksand max-w-2xl mx-auto mb-4">
             Get instant help from our AI assistant or connect with licensed veterinarians
+          </p>
+          <p className="text-2xl md:text-3xl font-bold text-kawaii-yellow-dark font-quicksand">
+            🏡 "Send every paw back home."
           </p>
         </div>
 
@@ -353,7 +360,7 @@ const VetChatPage: React.FC = () => {
                         <Bot size={24} className="text-white" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-gray-800">AI Vet Assistant</h3>
+                        <h3 className="text-xl font-bold text-gray-800">PawBackHome AI Assistant</h3>
                         <p className="text-gray-600 font-quicksand">Always available • Instant responses</p>
                       </div>
                     </>
@@ -453,11 +460,11 @@ const VetChatPage: React.FC = () => {
                     {activeTab === 'ai' ? '🤖' : '🩺'}
                   </div>
                   <h3 className="text-2xl font-bold text-gray-700 mb-3">
-                    {activeTab === 'ai' ? 'AI Vet Assistant Ready' : 'Ready for Consultation'}
+                    {activeTab === 'ai' ? 'PawBackHome AI Assistant Ready' : 'Ready for Consultation'}
                   </h3>
                   <p className="text-gray-600 font-quicksand text-lg max-w-md mx-auto">
                     {activeTab === 'ai' 
-                      ? 'Ask me any pet care questions and I\'ll help you right away!'
+                      ? 'Ask me any pet care questions and I\'ll help you get your furry friend back to feeling their best!'
                       : selectedVet 
                         ? 'Your veterinarian is ready to help with your pet\'s health concerns.'
                         : 'Select a veterinarian above to begin your consultation.'

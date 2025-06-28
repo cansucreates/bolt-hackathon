@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Upload, Heart } from 'lucide-react';
+import { Search, Upload, Heart, Home } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -11,10 +11,14 @@ const LostFoundSection: React.FC = () => {
     <section className="py-16 relative">
       <div className="kawaii-container">
         <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Home size={32} className="text-kawaii-yellow-dark" />
+            <Heart size={28} className="text-kawaii-pink-dark fill-kawaii-pink-dark" />
+          </div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
             Lost & Found Pets
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto font-quicksand">
             Help reunite pets with their families by reporting found animals or searching for your lost companion
           </p>
         </div>
@@ -24,7 +28,7 @@ const LostFoundSection: React.FC = () => {
             <div className="flex flex-col items-center text-center h-full">
               <Search size={48} className="text-kawaii-pink-dark mb-4" />
               <h3 className="text-2xl font-bold text-gray-800 mb-4">Lost a Pet?</h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 mb-6 font-quicksand">
                 Search our database of found pets or report your missing furry friend
               </p>
               
@@ -59,15 +63,18 @@ const LostFoundSection: React.FC = () => {
           
           <Card className="flex-1 p-8">
             <div className="flex flex-col items-center text-center h-full">
-              <Heart size={48} className="text-kawaii-pink-dark mb-4" />
+              <div className="flex items-center gap-2 mb-4">
+                <Heart size={48} className="text-kawaii-pink-dark" />
+                <Home size={32} className="text-kawaii-yellow-dark" />
+              </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">Found a Pet?</h3>
-              <p className="text-gray-600 mb-6">
-                Report a found pet to help them reunite with their worried owners
+              <p className="text-gray-600 mb-6 font-quicksand">
+                Report a found pet to help them get back home to their worried families
               </p>
               <div className="border-2 border-dashed border-kawaii-pink rounded-lg p-8 mb-6 w-full">
                 <div className="flex flex-col items-center">
                   <Upload size={32} className="text-kawaii-pink-dark mb-2" />
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-gray-600 text-sm font-quicksand">
                     Drop a photo here or click to upload
                   </p>
                 </div>
@@ -79,7 +86,7 @@ const LostFoundSection: React.FC = () => {
                   variant="green" 
                   className="w-full justify-center"
                 >
-                  Report Found Pet
+                  Help Pet Get Home
                 </Button>
               </div>
             </div>
@@ -170,7 +177,7 @@ const PetCard: React.FC<PetCardProps> = ({
           variant={type === 'Lost' ? 'primary' : 'green'}
           className="w-full justify-center"
         >
-          {type === 'Lost' ? 'I Found This Pet' : 'Contact Finder'}
+          {type === 'Lost' ? 'I Found This Pet' : 'Help Get Home'}
         </Button>
       </div>
     </Card>
