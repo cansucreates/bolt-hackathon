@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { UserSettingsProvider } from './contexts/UserSettingsContext';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import HomePage from './pages/HomePage';
@@ -53,48 +52,46 @@ function App() {
 
   return (
     <AuthProvider>
-      <UserSettingsProvider>
-        <Router>
-          <ScrollToTop />
-          <Layout>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/lost-found" element={<LostFoundPage />} />
-              <Route path="/lost-found/registry" element={<LostFoundRegistryPage />} />
-              <Route path="/crowdfunding" element={<CrowdfundingPage />} />
-              <Route path="/adoption" element={<AdoptionPage />} />
-              <Route path="/vets" element={<VetPage />} />
-              <Route path="/chat" element={<VetChatPage />} />
-              <Route path="/community" element={<CommunityPage />} />
-              
-              {/* Protected Routes */}
-              <Route 
-                path="/profile" 
-                element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                } 
-              />
-              
-              {/* Auth Callback - This handles Google OAuth redirects */}
-              <Route path="/auth/callback" element={<AuthCallbackPage />} />
-              
-              {/* Additional navigation routes */}
-              <Route path="/guide" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Pet Care Guide</h1><p className="text-gray-600">Coming Soon!</p></div>} />
-              <Route path="/emergency" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Emergency Help</h1><p className="text-gray-600">Coming Soon!</p></div>} />
-              <Route path="/blog" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Pet Blog</h1><p className="text-gray-600">Coming Soon!</p></div>} />
-              <Route path="/events" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Events</h1><p className="text-gray-600">Coming Soon!</p></div>} />
-              <Route path="/volunteer" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Volunteer</h1><p className="text-gray-600">Coming Soon!</p></div>} />
-              <Route path="/about" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">About Us</h1><p className="text-gray-600">Coming Soon!</p></div>} />
-              <Route path="/contact" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Contact</h1><p className="text-gray-600">Coming Soon!</p></div>} />
-              <Route path="/privacy" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Privacy Policy</h1><p className="text-gray-600">Coming Soon!</p></div>} />
-              <Route path="/terms" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Terms of Service</h1><p className="text-gray-600">Coming Soon!</p></div>} />
-              <Route path="/faq" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">FAQ</h1><p className="text-gray-600">Coming Soon!</p></div>} />
-            </Routes>
-          </Layout>
-        </Router>
-      </UserSettingsProvider>
+      <Router>
+        <ScrollToTop />
+        <Layout>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/lost-found" element={<LostFoundPage />} />
+            <Route path="/lost-found/registry" element={<LostFoundRegistryPage />} />
+            <Route path="/crowdfunding" element={<CrowdfundingPage />} />
+            <Route path="/adoption" element={<AdoptionPage />} />
+            <Route path="/vets" element={<VetPage />} />
+            <Route path="/chat" element={<VetChatPage />} />
+            <Route path="/community" element={<CommunityPage />} />
+            
+            {/* Protected Routes */}
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Auth Callback - This handles Google OAuth redirects */}
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            
+            {/* Additional navigation routes */}
+            <Route path="/guide" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Pet Care Guide</h1><p className="text-gray-600">Coming Soon!</p></div>} />
+            <Route path="/emergency" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Emergency Help</h1><p className="text-gray-600">Coming Soon!</p></div>} />
+            <Route path="/blog" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Pet Blog</h1><p className="text-gray-600">Coming Soon!</p></div>} />
+            <Route path="/events" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Events</h1><p className="text-gray-600">Coming Soon!</p></div>} />
+            <Route path="/volunteer" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Volunteer</h1><p className="text-gray-600">Coming Soon!</p></div>} />
+            <Route path="/about" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">About Us</h1><p className="text-gray-600">Coming Soon!</p></div>} />
+            <Route path="/contact" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Contact</h1><p className="text-gray-600">Coming Soon!</p></div>} />
+            <Route path="/privacy" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Privacy Policy</h1><p className="text-gray-600">Coming Soon!</p></div>} />
+            <Route path="/terms" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">Terms of Service</h1><p className="text-gray-600">Coming Soon!</p></div>} />
+            <Route path="/faq" element={<div className="pt-24 pb-16 text-center"><h1 className="text-4xl font-bold text-gray-800 mb-4">FAQ</h1><p className="text-gray-600">Coming Soon!</p></div>} />
+          </Routes>
+        </Layout>
+      </Router>
     </AuthProvider>
   );
 }
