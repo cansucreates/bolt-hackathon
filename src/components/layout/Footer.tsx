@@ -15,8 +15,8 @@ const Footer: React.FC = () => {
                   size={32} 
                   className="text-kawaii-pink-dark fill-kawaii-pink-dark" 
                 />
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-kawaii-yellow rounded-full flex items-center justify-center">
-                  <Home size={10} className="text-gray-700" />
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-kawaii-lavender rounded-full flex items-center justify-center">
+                  <Home size={10} className="text-kawaii-lavender-dark" />
                 </div>
               </div>
               <span className="text-2xl font-bold text-gray-700">PawBackHome</span>

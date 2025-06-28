@@ -15,7 +15,7 @@ const Hero: React.FC = () => {
               />
               <Home 
                 size={20} 
-                className="inline-block text-kawaii-orange fill-kawaii-orange sm:h-6 sm:w-6" 
+                className="inline-block text-kawaii-lavender-dark fill-kawaii-lavender-dark sm:h-6 sm:w-6" 
               />
             </div>
             <span className="kawaii-floating inline-block relative">
@@ -31,7 +31,7 @@ const Hero: React.FC = () => {
           </h1>
           
           <div className="mb-6 md:mb-8">
-            <p className="text-2xl md:text-3xl font-bold text-kawaii-orange-dark mb-2 font-quicksand">
+            <p className="text-2xl md:text-3xl font-bold text-kawaii-lavender-dark mb-2 font-quicksand">
               🏡 "Send every paw back home."
             </p>
             <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-4 sm:px-0 font-quicksand">

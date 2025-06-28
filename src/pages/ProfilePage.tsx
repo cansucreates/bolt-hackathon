@@ -25,7 +25,7 @@ const ProfilePage: React.FC = () => {
           <div className="mb-6">
             <div className="inline-block bouncing-paw">
               <div className="flex items-center gap-2">
-                <Home size={48} className="text-kawaii-pink-dark" />
+                <Home size={48} className="text-kawaii-lavender-dark" />
               </div>
             </div>
           </div>
@@ -35,7 +35,7 @@ const ProfilePage: React.FC = () => {
           <p className="text-xl text-gray-700 font-quicksand max-w-2xl mx-auto mb-4">
             Manage your account settings and view your PawBackHome activity
           </p>
-          <p className="text-2xl md:text-3xl font-bold text-kawaii-yellow-dark font-quicksand">
+          <p className="text-2xl md:text-3xl font-bold text-kawaii-lavender-dark font-quicksand">
             🏡 "Send every paw back home."
           </p>
         </div>

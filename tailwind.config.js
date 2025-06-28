@@ -11,15 +11,15 @@ export default {
         'kawaii-green': '#D8FFE6',
         'kawaii-green-dark': '#B6FFDA',
         'kawaii-yellow': '#FFF8D6',
-        'kawaii-yellow-dark': '#F97316', // Changed to vibrant orange
+        'kawaii-yellow-dark': '#A78BFA', // Changed to soft lavender
         'kawaii-purple': '#EBD6FF',
         'kawaii-purple-dark': '#DEB6FF',
         'kawaii-coral': '#FFDEDE',
         'kawaii-mint': '#B6FFDA',
-        'kawaii-orange': '#FB923C', // Soft coral for home icons
-        'kawaii-orange-dark': '#EA580C', // Deeper coral for contrast
-        'kawaii-peach': '#FECACA', // Added soft peach for variety
-        'kawaii-peach-dark': '#F87171', // Deeper peach
+        'kawaii-lavender': '#E0E7FF', // Added soft lavender
+        'kawaii-lavender-dark': '#A78BFA', // Deeper lavender for contrast
+        'kawaii-periwinkle': '#C7D2FE', // Added muted periwinkle
+        'kawaii-periwinkle-dark': '#8B5CF6', // Deeper periwinkle
       },
       fontFamily: {
         'kawaii': ['Nunito', 'Comic Sans MS', 'sans-serif'],
