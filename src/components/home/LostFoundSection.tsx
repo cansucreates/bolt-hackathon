@@ -107,16 +107,31 @@ const LostFoundSection: React.FC = () => {
     }
   };
 
-  // Enhanced "Help Pet Get Home" button handler
+  // Enhanced "Help Pet Get Home" button handler with proper error handling
   const handleHelpPetGetHome = () => {
-    if (uploadedImage) {
-      // Store image data in sessionStorage for transfer
-      sessionStorage.setItem('transferredPetImage', uploadedImage);
+    try {
+      console.log('Help Pet Get Home button clicked');
+      console.log('Uploaded image exists:', !!uploadedImage);
+      
+      if (uploadedImage) {
+        // Store image data in sessionStorage for transfer
+        sessionStorage.setItem('transferredPetImage', uploadedImage);
+        console.log('Image stored in sessionStorage');
+        
+        // Add timestamp to ensure fresh data
+        sessionStorage.setItem('transferredPetImageTimestamp', Date.now().toString());
+      }
       
       // Navigate to registry page with found pet form and auto-open
-      window.location.href = '/lost-found/registry?type=found&autoOpen=true';
-    } else {
-      // If no image uploaded, just go to the registry page
+      const targetUrl = '/lost-found/registry?type=found&autoOpen=true';
+      console.log('Navigating to:', targetUrl);
+      
+      // Use window.location.href for reliable navigation
+      window.location.href = targetUrl;
+      
+    } catch (error) {
+      console.error('Error in handleHelpPetGetHome:', error);
+      // Fallback navigation without image transfer
       window.location.href = '/lost-found/registry?type=found&autoOpen=true';
     }
   };
@@ -298,16 +313,24 @@ const LostFoundSection: React.FC = () => {
                 )}
               </div>
 
-              {/* Enhanced "Help Pet Get Home" button */}
+              {/* Enhanced "Help Pet Get Home" button with better error handling */}
               <div className="w-full mt-auto">
                 <button
                   onClick={handleHelpPetGetHome}
                   className="w-full bg-kawaii-green hover:bg-kawaii-green-dark text-gray-700 font-bold py-3 px-6 rounded-kawaii transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-md"
                   aria-label="Help pet get home by reporting to our registry"
+                  disabled={isUploading}
                 >
                   <Heart size={18} />
                   Help Pet Get Home
                 </button>
+                
+                {/* Debug info in development */}
+                {process.env.NODE_ENV === 'development' && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    Debug: Image ready = {uploadedImage ? 'Yes' : 'No'}
+                  </div>
+                )}
               </div>
             </div>
           </Card>

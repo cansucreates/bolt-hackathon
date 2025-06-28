@@ -114,6 +114,10 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Form submission started');
+    console.log('User authenticated:', !!user);
+    console.log('Form data:', formData);
+    
     if (!user) {
       setMessage({ type: 'error', text: 'You must be logged in to submit a report' });
       return;
@@ -132,6 +136,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
 
       // Upload image if a new file is selected
       if (imageFile) {
+        console.log('Uploading new image file...');
         setIsUploading(true);
         setUploadProgress(0);
         
@@ -153,23 +158,32 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
         setIsUploading(false);
 
         if (uploadResult.error) {
+          console.error('Image upload failed:', uploadResult.error);
           setMessage({ type: 'error', text: uploadResult.error });
           setIsSubmitting(false);
           return;
         }
 
         photoUrl = uploadResult.url;
+        console.log('Image uploaded successfully:', photoUrl);
       }
 
       // Submit report
-      const result = await submitPetReport({
+      console.log('Submitting pet report...');
+      const reportData = {
         ...formData,
         photo_url: photoUrl
-      });
+      };
+      
+      console.log('Report data being submitted:', reportData);
+      
+      const result = await submitPetReport(reportData);
 
       if (result.error) {
+        console.error('Report submission failed:', result.error);
         setMessage({ type: 'error', text: result.error });
       } else {
+        console.log('Report submitted successfully:', result.data);
         setMessage({ 
           type: 'success', 
           text: `${type === 'lost' ? 'Lost' : 'Found'} pet report submitted successfully! 🏡 Helping this pet get back home.` 
@@ -187,12 +201,16 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
         setImageFile(null);
         setImagePreview('');
         
+        // Clear transferred image from sessionStorage
+        sessionStorage.removeItem('transferredPetImage');
+        sessionStorage.removeItem('transferredPetImageTimestamp');
+        
         setTimeout(() => {
           onSuccess();
         }, 2000);
       }
     } catch (error) {
-      console.error('Submission error:', error);
+      console.error('Unexpected submission error:', error);
       setMessage({ type: 'error', text: 'An unexpected error occurred. Please try again.' });
     } finally {
       setIsSubmitting(false);

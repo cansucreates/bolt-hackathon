@@ -20,20 +20,38 @@ const ReportsList: React.FC = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
 
-  // Check for URL parameters and transferred image data
+  // Enhanced URL parameter and image transfer handling
   useEffect(() => {
+    console.log('ReportsList component mounted');
+    
     const urlParams = new URLSearchParams(window.location.search);
     const type = urlParams.get('type') as 'lost' | 'found';
     const autoOpen = urlParams.get('autoOpen') === 'true';
     
-    // Check for transferred image data
+    console.log('URL params:', { type, autoOpen });
+    
+    // Check for transferred image data with timestamp validation
     const transferredImageData = sessionStorage.getItem('transferredPetImage');
-    if (transferredImageData) {
-      setTransferredImage(transferredImageData);
-      sessionStorage.removeItem('transferredPetImage'); // Clean up
+    const transferredTimestamp = sessionStorage.getItem('transferredPetImageTimestamp');
+    
+    if (transferredImageData && transferredTimestamp) {
+      const timestamp = parseInt(transferredTimestamp);
+      const now = Date.now();
+      const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
+      
+      // Only use transferred image if it's less than 5 minutes old
+      if (now - timestamp < fiveMinutes) {
+        console.log('Using transferred image data');
+        setTransferredImage(transferredImageData);
+      } else {
+        console.log('Transferred image data expired, clearing...');
+        sessionStorage.removeItem('transferredPetImage');
+        sessionStorage.removeItem('transferredPetImageTimestamp');
+      }
     }
     
     if (type && autoOpen) {
+      console.log('Auto-opening form for type:', type);
       setFormType(type);
       setShowForm(true);
       
@@ -46,12 +64,16 @@ const ReportsList: React.FC = () => {
   }, []);
 
   const loadReports = async () => {
+    console.log('Loading reports...');
     setLoading(true);
     const result = await fetchPetReports(filters);
     
     if (result.data) {
+      console.log('Reports loaded successfully:', result.data.length);
       setReports(result.data);
       setFilteredReports(result.data);
+    } else if (result.error) {
+      console.error('Failed to load reports:', result.error);
     }
     
     setLoading(false);
@@ -103,16 +125,22 @@ const ReportsList: React.FC = () => {
   };
 
   const handleFormSuccess = () => {
+    console.log('Form submitted successfully');
     setShowForm(false);
     setTransferredImage(''); // Clear transferred image
-    loadReports();
+    
+    // Clear sessionStorage
+    sessionStorage.removeItem('transferredPetImage');
+    sessionStorage.removeItem('transferredPetImageTimestamp');
+    
+    loadReports(); // Reload reports to show the new submission
   };
 
   const handleReportUpdate = () => {
     loadReports();
   };
 
-  // Empty State Component
+  // Enhanced Empty State Component
   const EmptyState: React.FC = () => {
     const hasActiveFilters = 
       filters.type !== 'all' ||
@@ -243,6 +271,8 @@ const ReportsList: React.FC = () => {
             onCancel={() => {
               setShowForm(false);
               setTransferredImage(''); // Clear transferred image on cancel
+              sessionStorage.removeItem('transferredPetImage');
+              sessionStorage.removeItem('transferredPetImageTimestamp');
             }}
             initialImageData={transferredImage}
           />
@@ -266,7 +296,7 @@ const ReportsList: React.FC = () => {
         </div>
 
         {/* Search and Filter Bar */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-kawaii shadow-kawaii border-2 border-kawaii-pink/30 p-6 mb-8">
+        <div className="bg-white/80 backdrop-blur-sm rounded-kawaii shadow-kawaii border-2 border-kawaii-pink/30 p-4 md:p-6 mb-8">
           <div className="flex flex-col gap-4">
             
             {/* Search Bar */}
