@@ -14,6 +14,7 @@ const ReportCard: React.FC<ReportCardProps> = ({ report, onUpdate }) => {
   const [showActions, setShowActions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const isOwner = user?.id === report.user_id;
 
@@ -72,10 +73,18 @@ const ReportCard: React.FC<ReportCardProps> = ({ report, onUpdate }) => {
       {/* Image Container */}
       <div className="relative overflow-hidden rounded-t-kawaii">
         <div className="aspect-video bg-gray-200 relative">
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-kawaii-pink/20 animate-pulse flex items-center justify-center">
+              <PawPrint size={32} className="text-kawaii-pink-dark opacity-50" />
+            </div>
+          )}
           <img
             src={report.photo_url}
             alt={report.pet_name || 'Pet photo'}
-            className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoad={() => setImageLoaded(true)}
             loading="lazy"
           />
           
