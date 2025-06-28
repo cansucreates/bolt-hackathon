@@ -8,7 +8,7 @@
   html {
     font-family: 'Nunito', 'Comic Sans MS', system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
-    scroll-behavior: auto; /* Disable smooth scrolling for instant page transitions */
+    scroll-behavior: smooth; /* Enable smooth scrolling */
   }
   
   body {
@@ -30,6 +30,11 @@
     input, textarea, select {
       font-size: 16px !important; /* Prevents zoom on iOS */
     }
+  }
+
+  /* Scroll margin for anchor links */
+  .scroll-mt-20 {
+    scroll-margin-top: 5rem;
   }
 }
 
@@ -290,6 +295,15 @@
       grid-template-columns: repeat(3, 1fr);
     }
   }
+
+  /* Upload area enhancements */
+  .upload-area-hover {
+    @apply transform scale-105 border-kawaii-green bg-kawaii-green/20;
+  }
+
+  .upload-progress-bar {
+    @apply bg-gradient-to-r from-kawaii-blue to-kawaii-blue-dark;
+  }
 }
 
 .floating-element {
@@ -418,6 +432,10 @@ html {
   .kawaii-button-yellow {
     transition: none;
   }
+
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 /* Enhanced mobile form validation styles */
@@ -443,19 +461,7 @@ html {
 
 /* Scroll restoration and page transition styles */
 html, body {
-  scroll-behavior: auto !important; /* Override any smooth scrolling */
-}
-
-/* Ensure consistent scroll position reset */
-.page-transition {
-  scroll-behavior: auto;
-}
-
-/* Prevent scroll restoration interference */
-@media all {
-  html {
-    scroll-behavior: auto !important;
-  }
+  scroll-behavior: smooth !important;
 }
 
 /* Responsive breakpoint improvements */

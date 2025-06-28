@@ -3,6 +3,16 @@ import { Heart, Search, MapPin, Users } from 'lucide-react';
 import Button from '../ui/Button';
 
 const Hero: React.FC = () => {
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
   return (
     <div className="relative pt-16 md:pt-20 pb-8 md:pb-10">
       <div className="kawaii-container pt-8 md:pt-16 text-center px-4 sm:px-6">
@@ -34,20 +44,22 @@ const Hero: React.FC = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3 justify-center px-4 sm:px-0">
-            <Button 
-              variant="primary"
-              icon={<Search size={18} className="sm:w-5 sm:h-5" />}
-              className="text-base sm:text-lg w-full sm:w-auto"
+            <button
+              onClick={() => scrollToSection('lost-found-section')}
+              className="kawaii-button bg-kawaii-pink hover:bg-kawaii-pink-dark text-gray-700 font-bold py-3 px-6 text-base sm:text-lg w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95"
+              aria-label="Find lost pet - scroll to lost and found section"
             >
+              <Search size={18} className="sm:w-5 sm:h-5" />
               Find Lost Pet
-            </Button>
-            <Button 
-              variant="blue"
-              icon={<MapPin size={18} className="sm:w-5 sm:h-5" />}
-              className="text-base sm:text-lg w-full sm:w-auto"
+            </button>
+            <button
+              onClick={() => scrollToSection('lost-found-section')}
+              className="kawaii-button-blue bg-kawaii-blue hover:bg-kawaii-blue-dark text-gray-700 font-bold py-3 px-6 text-base sm:text-lg w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95"
+              aria-label="Report found pet - scroll to lost and found section"
             >
+              <MapPin size={18} className="sm:w-5 sm:h-5" />
               Report Found Pet
-            </Button>
+            </button>
           </div>
           
           <div className="mt-12 md:mt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 px-4 sm:px-0">

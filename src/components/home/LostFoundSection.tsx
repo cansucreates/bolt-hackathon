@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Upload, Heart, Home } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Search, Upload, Heart, Home, CheckCircle, AlertTriangle, X, Camera } from 'lucide-react';
 import { Link } from '../navigation/Link';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
@@ -7,9 +7,108 @@ import Input from '../ui/Input';
 
 const LostFoundSection: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (file: File) => {
+    // Reset states
+    setUploadError(null);
+    setUploadSuccess(false);
+    setUploadProgress(0);
+
+    // Validate file
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/heif'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+
+    if (!validTypes.includes(file.type)) {
+      setUploadError('Please upload a valid image file (JPG, PNG, HEIC)');
+      return;
+    }
+
+    if (file.size > maxSize) {
+      setUploadError('File size must be less than 10MB');
+      return;
+    }
+
+    // Simulate upload process with progress
+    setIsUploading(true);
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      
+      // Simulate upload progress
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 30;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+          setIsUploading(false);
+          setUploadedImage(result);
+          setUploadSuccess(true);
+          setTimeout(() => setUploadSuccess(false), 3000);
+        }
+        setUploadProgress(Math.min(progress, 100));
+      }, 200);
+    };
+
+    reader.onerror = () => {
+      setIsUploading(false);
+      setUploadError('Failed to read file. Please try again.');
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const removeImage = () => {
+    setUploadedImage(null);
+    setUploadProgress(0);
+    setUploadError(null);
+    setUploadSuccess(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   return (
-    <section className="py-16 relative">
+    <section id="lost-found-section" className="py-16 relative scroll-mt-20">
       <div className="kawaii-container">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 mb-4">
@@ -40,6 +139,7 @@ const LostFoundSection: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full text-center"
+                  aria-label="Search for lost pets by description or location"
                 />
               </div>
               
@@ -49,6 +149,7 @@ const LostFoundSection: React.FC = () => {
                   <Button 
                     variant="primary" 
                     className="w-full justify-center"
+                    aria-label="Search for lost pets in our registry"
                   >
                     Search Lost Pets
                   </Button>
@@ -58,6 +159,7 @@ const LostFoundSection: React.FC = () => {
                     variant="blue" 
                     icon={<Upload size={18} />}
                     className="w-full justify-center"
+                    aria-label="Report your lost pet to our registry"
                   >
                     Report Lost Pet
                   </Button>
@@ -76,21 +178,109 @@ const LostFoundSection: React.FC = () => {
               <p className="text-gray-600 mb-6 font-quicksand">
                 Report a found pet to help them get back home to their worried families
               </p>
-              <div className="border-2 border-dashed border-kawaii-pink rounded-lg p-8 mb-6 w-full">
-                <div className="flex flex-col items-center">
-                  <Upload size={32} className="text-kawaii-pink-dark mb-2" />
-                  <p className="text-gray-600 text-sm font-quicksand">
-                    Drop a photo here or click to upload
-                  </p>
-                </div>
+
+              {/* Enhanced Photo Upload Area */}
+              <div className="w-full mb-6 flex-grow flex flex-col">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/heic,image/heif"
+                  onChange={handleFileInputChange}
+                  className="hidden"
+                  aria-label="Upload photo of found pet"
+                />
+
+                {uploadedImage ? (
+                  /* Image Preview */
+                  <div className="relative border-2 border-kawaii-green rounded-kawaii p-4 bg-kawaii-green/10">
+                    <button
+                      onClick={removeImage}
+                      className="absolute top-2 right-2 w-8 h-8 bg-red-100 hover:bg-red-200 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                      aria-label="Remove uploaded image"
+                    >
+                      <X size={16} className="text-red-600" />
+                    </button>
+                    <img
+                      src={uploadedImage}
+                      alt="Uploaded pet"
+                      className="w-full h-48 object-cover rounded-kawaii mb-3"
+                    />
+                    {uploadSuccess && (
+                      <div className="flex items-center justify-center gap-2 text-green-600 font-semibold">
+                        <CheckCircle size={16} />
+                        <span className="text-sm">Photo uploaded successfully!</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Upload Area */
+                  <div
+                    className={`border-2 border-dashed rounded-kawaii p-8 text-center transition-all duration-300 cursor-pointer flex-grow flex flex-col justify-center ${
+                      isDragOver
+                        ? 'border-kawaii-green bg-kawaii-green/20 scale-105'
+                        : 'border-kawaii-pink bg-kawaii-pink/10 hover:bg-kawaii-pink/20'
+                    } ${isUploading ? 'pointer-events-none' : ''}`}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onClick={handleUploadClick}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Upload area for pet photos - click or drag and drop"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleUploadClick();
+                      }
+                    }}
+                  >
+                    <div className="flex flex-col items-center">
+                      {isUploading ? (
+                        <>
+                          <Camera size={48} className="text-kawaii-blue-dark mb-4 animate-pulse" />
+                          <div className="w-full max-w-xs mb-4">
+                            <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
+                              <div 
+                                className="bg-kawaii-blue-dark h-full transition-all duration-300 ease-out"
+                                style={{ width: `${uploadProgress}%` }}
+                              />
+                            </div>
+                            <p className="text-sm text-gray-600 mt-2">
+                              Uploading... {Math.round(uploadProgress)}%
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={48} className="text-kawaii-pink-dark mb-4" />
+                          <p className="text-gray-700 font-quicksand font-semibold mb-2">
+                            {isDragOver ? 'Drop photo here!' : 'Drop or click to upload pet photo'}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            JPG, PNG, HEIC (max 10MB)
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Error Message */}
+                {uploadError && (
+                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-kawaii flex items-center gap-2">
+                    <AlertTriangle size={16} className="text-red-600 flex-shrink-0" />
+                    <span className="text-sm text-red-700">{uploadError}</span>
+                  </div>
+                )}
               </div>
-              
+
               {/* Single button that links to registry */}
               <div className="w-full mt-auto">
                 <Link to="/lost-found/registry" className="w-full">
                   <Button 
                     variant="green" 
                     className="w-full justify-center"
+                    aria-label="Help pet get home by reporting to our registry"
                   >
                     Help Pet Get Home
                   </Button>
@@ -132,7 +322,10 @@ const LostFoundSection: React.FC = () => {
         
         <div className="text-center mt-8">
           <Link to="/lost-found/registry">
-            <Button variant="primary">
+            <Button 
+              variant="primary"
+              aria-label="View all pet reports in our comprehensive registry"
+            >
               View All Reports
             </Button>
           </Link>
@@ -186,6 +379,7 @@ const PetCard: React.FC<PetCardProps> = ({
           <Button 
             variant={type === 'Lost' ? 'primary' : 'green'}
             className="w-full justify-center"
+            aria-label={type === 'Lost' ? 'Report that you found this pet' : 'Help this pet get home'}
           >
             {type === 'Lost' ? 'I Found This Pet' : 'Help Get Home'}
           </Button>
