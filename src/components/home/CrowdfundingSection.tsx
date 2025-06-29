@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Heart, DollarSign, ArrowRight, Coins, Home } from 'lucide-react';
 import { Link } from '../navigation/Link';
 import { Campaign } from '../../types/crowdfunding';
+import EnhancedDonationModal from '../donation/EnhancedDonationModal';
+import { formatCurrency } from '../../lib/donationService';
 
 // Mock featured campaigns for homepage
 const featuredCampaigns: Campaign[] = [
@@ -70,6 +72,8 @@ const featuredCampaigns: Campaign[] = [
 const CrowdfundingSection: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [campaigns, setCampaigns] = useState<Campaign[]>(featuredCampaigns);
 
   // Auto-slide functionality
   useEffect(() => {
@@ -81,15 +85,23 @@ const CrowdfundingSection: React.FC = () => {
     }
   }, [isHovered]);
 
-  const formatAmount = (amount: number) => {
-    if (amount >= 1000) {
-      return `$${(amount / 1000).toFixed(1)}k`;
-    }
-    return `$${amount}`;
+  const handleDonate = (campaign: Campaign) => {
+    setSelectedCampaign(campaign);
   };
 
-  const getProgressPercentage = (current: number, goal: number) => {
-    return Math.min((current / goal) * 100, 100);
+  const handleDonationComplete = (amount: number, isAnonymous: boolean) => {
+    if (selectedCampaign) {
+      // Update campaign with new donation
+      setCampaigns(prev => prev.map(campaign => 
+        campaign.id === selectedCampaign.id 
+          ? { 
+              ...campaign, 
+              currentAmount: campaign.currentAmount + amount,
+              donorCount: campaign.donorCount + 1
+            }
+          : campaign
+      ));
+    }
   };
 
   return (
@@ -144,7 +156,7 @@ const CrowdfundingSection: React.FC = () => {
               className="flex transition-transform duration-500 ease-in-out"
               style={{ transform: `translateX(-${currentSlide * 100}%)` }}
             >
-              {featuredCampaigns.map((campaign) => (
+              {campaigns.map((campaign) => (
                 <div key={campaign.id} className="w-full flex-shrink-0">
                   <div className="bg-white/90 backdrop-blur-sm rounded-kawaii shadow-kawaii border-2 border-kawaii-yellow/30 overflow-hidden mx-2">
                     <div className="flex flex-col md:flex-row">
@@ -195,26 +207,29 @@ const CrowdfundingSection: React.FC = () => {
                           <div className="space-y-2">
                             <div className="flex justify-between items-center">
                               <span className="font-bold text-gray-800">
-                                {formatAmount(campaign.currentAmount)} raised
+                                {formatCurrency(campaign.currentAmount)} raised
                               </span>
                               <span className="text-sm text-gray-600">
-                                of {formatAmount(campaign.goalAmount)}
+                                of {formatCurrency(campaign.goalAmount)}
                               </span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
                               <div 
                                 className="h-full bg-gradient-to-r from-kawaii-yellow to-kawaii-yellow-dark rounded-full transition-all duration-1000 ease-out"
-                                style={{ width: `${getProgressPercentage(campaign.currentAmount, campaign.goalAmount)}%` }}
+                                style={{ width: `${Math.min((campaign.currentAmount / campaign.goalAmount) * 100, 100)}%` }}
                               />
                             </div>
                             <div className="flex items-center justify-between text-sm text-gray-600">
-                              <span>{Math.round(getProgressPercentage(campaign.currentAmount, campaign.goalAmount))}% funded</span>
+                              <span>{Math.round((campaign.currentAmount / campaign.goalAmount) * 100)}% funded</span>
                               <span>{campaign.donorCount} donors • {campaign.daysLeft} days left</span>
                             </div>
                           </div>
 
                           {/* Donate Button */}
-                          <button className="w-full py-3 px-6 bg-kawaii-yellow hover:bg-kawaii-yellow-dark text-gray-700 font-bold rounded-kawaii transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-md">
+                          <button 
+                            onClick={() => handleDonate(campaign)}
+                            className="w-full py-3 px-6 bg-kawaii-yellow hover:bg-kawaii-yellow-dark text-gray-700 font-bold rounded-kawaii transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-md"
+                          >
                             <DollarSign size={20} />
                             Help Get Home
                           </button>
@@ -229,7 +244,7 @@ const CrowdfundingSection: React.FC = () => {
 
           {/* Carousel Indicators */}
           <div className="flex justify-center mt-6 gap-2">
-            {featuredCampaigns.map((_, index) => (
+            {campaigns.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
@@ -238,6 +253,7 @@ const CrowdfundingSection: React.FC = () => {
                     ? 'bg-kawaii-yellow-dark scale-125' 
                     : 'bg-gray-300 hover:bg-gray-400'
                 }`}
+                aria-label={`Go to slide ${index + 1}`}
               />
             ))}
           </div>
@@ -270,6 +286,14 @@ const CrowdfundingSection: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {selectedCampaign && (
+        <EnhancedDonationModal
+          campaign={selectedCampaign}
+          onClose={() => setSelectedCampaign(null)}
+          onSuccess={handleDonationComplete}
+        />
+      )}
     </section>
   );
 };

@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import CrowdfundingHeader from '../components/crowdfunding/CrowdfundingHeader';
 import FilterBar from '../components/crowdfunding/FilterBar';
 import CampaignGrid from '../components/crowdfunding/CampaignGrid';
-import DonationModal from '../components/crowdfunding/DonationModal';
+import EnhancedDonationModal from '../components/donation/EnhancedDonationModal';
 import TopDonors from '../components/crowdfunding/TopDonors';
 import DonationAnalytics from '../components/crowdfunding/DonationAnalytics';
+import EnhancedCampaignCard from '../components/crowdfunding/EnhancedCampaignCard';
 import { Campaign, CrowdfundingFilters, Donor } from '../types/crowdfunding';
+import { Link } from 'react-router-dom';
+import { Heart, ArrowRight } from 'lucide-react';
 
 // Mock data for demonstration
 const mockCampaigns: Campaign[] = [
@@ -201,6 +204,7 @@ const CrowdfundingPage: React.FC = () => {
     status: 'all',
     sort: 'newest'
   });
+  const [showDetailedCampaign, setShowDetailedCampaign] = useState<string | null>(null);
 
   // Apply filters and sorting
   useEffect(() => {
@@ -290,6 +294,10 @@ const CrowdfundingPage: React.FC = () => {
     }
   };
 
+  const toggleDetailedCampaign = (campaignId: string) => {
+    setShowDetailedCampaign(prev => prev === campaignId ? null : campaignId);
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Floating Coins Background */}
@@ -321,11 +329,73 @@ const CrowdfundingPage: React.FC = () => {
           onFilterChange={handleFilterChange}
         />
         
-        <CampaignGrid 
-          campaigns={filteredCampaigns}
-          loading={loading}
-          onDonate={handleDonate}
-        />
+        {/* Featured Campaign Section */}
+        {filteredCampaigns.some(c => c.isFeatured) && (
+          <div className="max-w-6xl mx-auto px-4 mb-12">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-3 bg-kawaii-yellow/20 px-6 py-3 rounded-kawaii border border-kawaii-yellow/30">
+                <div className="w-3 h-3 bg-kawaii-yellow rounded-full animate-pulse"></div>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  ⭐ Featured Campaigns
+                </h2>
+              </div>
+              <p className="text-gray-600 font-quicksand mt-2 px-4">
+                These animals need urgent help - your donation can make all the difference
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {filteredCampaigns
+                .filter(campaign => campaign.isFeatured)
+                .map(campaign => (
+                  <div key={campaign.id}>
+                    <EnhancedCampaignCard
+                      campaign={campaign}
+                      onDonate={handleDonate}
+                      isFeatured={true}
+                      showStats={showDetailedCampaign === campaign.id}
+                    />
+                    <div className="mt-4 text-center">
+                      <button
+                        onClick={() => toggleDetailedCampaign(campaign.id)}
+                        className="text-kawaii-yellow-dark hover:text-kawaii-yellow font-semibold flex items-center gap-1 mx-auto"
+                      >
+                        {showDetailedCampaign === campaign.id ? 'Hide Details' : 'Show Campaign Details'}
+                        <ArrowRight size={16} className={`transition-transform duration-300 ${showDetailedCampaign === campaign.id ? 'rotate-90' : ''}`} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Regular Campaigns */}
+        <div className="max-w-6xl mx-auto px-4 mb-12">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-3 bg-kawaii-blue/20 px-6 py-3 rounded-kawaii border border-kawaii-blue/30">
+              <div className="w-3 h-3 bg-kawaii-blue rounded-full"></div>
+              <h2 className="text-2xl font-bold text-gray-800">
+                All Campaigns ({filteredCampaigns.filter(c => !c.isFeatured).length})
+              </h2>
+            </div>
+            <p className="text-gray-600 font-quicksand mt-2 px-4">
+              Support these animals on their journey to health and happiness
+            </p>
+          </div>
+          
+          <div className="campaign-grid">
+            {filteredCampaigns
+              .filter(campaign => !campaign.isFeatured)
+              .map((campaign) => (
+                <EnhancedCampaignCard 
+                  key={campaign.id} 
+                  campaign={campaign} 
+                  onDonate={handleDonate}
+                />
+              ))}
+          </div>
+        </div>
 
         {/* Results Summary */}
         {!loading && filteredCampaigns.length > 0 && (
@@ -339,17 +409,37 @@ const CrowdfundingPage: React.FC = () => {
           </div>
         )}
 
-        {/* Bottom sections moved to end */}
+        {/* Donation Dashboard Link */}
+        <div className="max-w-6xl mx-auto px-4 mb-12">
+          <div className="bg-white/90 backdrop-blur-sm rounded-kawaii shadow-kawaii border-2 border-kawaii-yellow/30 p-6 text-center">
+            <Heart size={48} className="text-kawaii-yellow-dark mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">
+              Track Your Donations
+            </h3>
+            <p className="text-gray-600 font-quicksand mb-6 max-w-2xl mx-auto">
+              View your donation history, see your impact, and get updates on the animals you've helped.
+            </p>
+            <Link to="/donations">
+              <button className="kawaii-button bg-kawaii-yellow hover:bg-kawaii-yellow-dark text-gray-700 font-bold py-3 px-6 flex items-center gap-2 mx-auto">
+                <Heart size={18} />
+                Go to Donation Dashboard
+                <ArrowRight size={18} />
+              </button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Bottom sections */}
         <DonationAnalytics />
         
         <TopDonors donors={mockDonors} />
       </div>
 
       {selectedCampaign && (
-        <DonationModal
+        <EnhancedDonationModal
           campaign={selectedCampaign}
           onClose={() => setSelectedCampaign(null)}
-          onDonate={handleDonationComplete}
+          onSuccess={handleDonationComplete}
         />
       )}
     </div>

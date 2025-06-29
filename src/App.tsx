@@ -13,6 +13,7 @@ import VetChatPage from './pages/VetChatPage';
 import CommunityPage from './pages/CommunityPage';
 import ProfilePage from './pages/ProfilePage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
+import DonationPage from './pages/DonationPage';
 
 // Scroll to top component
 const ScrollToTop: React.FC = () => {
@@ -64,6 +65,7 @@ function App() {
             <Route path="/vets" element={<VetPage />} />
             <Route path="/chat" element={<VetChatPage />} />
             <Route path="/community" element={<CommunityPage />} />
+            <Route path="/donations" element={<DonationPage />} />
             
             {/* Protected Routes */}
             <Route 
