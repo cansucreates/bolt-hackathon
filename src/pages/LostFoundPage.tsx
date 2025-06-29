@@ -6,167 +6,31 @@ import PetCardsGrid from '../components/lost-found/PetCardsGrid';
 import ReportModal from '../components/lost-found/ReportModal';
 import UnifiedFilterSort from '../components/lost-found/UnifiedFilterSort';
 import { PetCard } from '../types/pet';
-
-// Extended mock data for demonstration (12+ cards)
-const mockPets: PetCard[] = [
-  {
-    id: '1',
-    status: 'lost',
-    name: 'Fluffy',
-    photo: 'https://images.pexels.com/photos/1490908/pexels-photo-1490908.jpeg',
-    location: 'Central Park, New York',
-    date: '2025-01-15',
-    description: 'Golden Retriever, very friendly, wearing a red collar with silver tags',
-    contactInfo: 'sarah@email.com',
-    isActive: true
-  },
-  {
-    id: '2',
-    status: 'found',
-    photo: 'https://images.pexels.com/photos/2061057/pexels-photo-2061057.jpeg',
-    location: 'Main Street, Boston',
-    date: '2025-01-16',
-    description: 'Tabby cat, no collar, very shy but friendly, appears well-fed',
-    contactInfo: 'john@email.com',
-    isActive: true
-  },
-  {
-    id: '3',
-    status: 'lost',
-    name: 'Max',
-    photo: 'https://images.pexels.com/photos/1629781/pexels-photo-1629781.jpeg',
-    location: 'Riverfront Park, Chicago',
-    date: '2025-01-14',
-    description: 'Corgi mix, brown and white, loves to play fetch, very energetic',
-    contactInfo: 'mike@email.com',
-    isActive: true
-  },
-  {
-    id: '4',
-    status: 'found',
-    photo: 'https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg',
-    location: 'Downtown Seattle',
-    date: '2025-01-17',
-    description: 'Small kitten, orange and white, very playful and curious',
-    contactInfo: 'emma@email.com',
-    isActive: true
-  },
-  {
-    id: '5',
-    status: 'lost',
-    name: 'Luna',
-    photo: 'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-    location: 'Golden Gate Park, San Francisco',
-    date: '2025-01-13',
-    description: 'Border Collie, black and white, responds to whistle, very intelligent',
-    contactInfo: 'alex@email.com',
-    isActive: true
-  },
-  {
-    id: '6',
-    status: 'found',
-    photo: 'https://images.pexels.com/photos/416160/pexels-photo-416160.jpeg',
-    location: 'Miami Beach, Florida',
-    date: '2025-01-18',
-    description: 'Small dog, possibly Chihuahua mix, wearing pink sweater',
-    contactInfo: 'maria@email.com',
-    isActive: true
-  },
-  {
-    id: '7',
-    status: 'lost',
-    name: 'Buddy',
-    photo: 'https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg',
-    location: 'Austin Downtown, Texas',
-    date: '2025-01-12',
-    description: 'German Shepherd mix, large, brown and black, wearing blue collar',
-    contactInfo: 'david@email.com',
-    isActive: true
-  },
-  {
-    id: '8',
-    status: 'found',
-    photo: 'https://images.pexels.com/photos/1741205/pexels-photo-1741205.jpeg',
-    location: 'Portland Park, Oregon',
-    date: '2025-01-19',
-    description: 'Medium-sized mixed breed, brown coat, very friendly with people',
-    contactInfo: 'lisa@email.com',
-    isActive: true
-  },
-  {
-    id: '9',
-    status: 'lost',
-    name: 'Whiskers',
-    photo: 'https://images.pexels.com/photos/1170986/pexels-photo-1170986.jpeg',
-    location: 'Denver Suburbs, Colorado',
-    date: '2025-01-11',
-    description: 'Long-haired cat, gray and white, indoor cat, may be hiding',
-    contactInfo: 'jennifer@email.com',
-    isActive: true
-  },
-  {
-    id: '10',
-    status: 'found',
-    photo: 'https://images.pexels.com/photos/1851164/pexels-photo-1851164.jpeg',
-    location: 'Nashville Center, Tennessee',
-    date: '2025-01-20',
-    description: 'Beagle mix, tri-color, wearing faded red collar, very gentle',
-    contactInfo: 'robert@email.com',
-    isActive: true
-  },
-  {
-    id: '11',
-    status: 'lost',
-    name: 'Princess',
-    photo: 'https://images.pexels.com/photos/1404819/pexels-photo-1404819.jpeg',
-    location: 'Las Vegas Strip, Nevada',
-    date: '2025-01-10',
-    description: 'Persian cat, white and gray, long fur, very pampered, indoor only',
-    contactInfo: 'amanda@email.com',
-    isActive: true
-  },
-  {
-    id: '12',
-    status: 'found',
-    photo: 'https://images.pexels.com/photos/1254140/pexels-photo-1254140.jpeg',
-    location: 'Phoenix Park, Arizona',
-    date: '2025-01-21',
-    description: 'Labrador mix, yellow coat, very energetic and loves water',
-    contactInfo: 'carlos@email.com',
-    isActive: true
-  },
-  {
-    id: '13',
-    status: 'lost',
-    name: 'Rocky',
-    photo: 'https://images.pexels.com/photos/1390361/pexels-photo-1390361.jpeg',
-    location: 'Salt Lake City, Utah',
-    date: '2025-01-09',
-    description: 'Bulldog mix, stocky build, brindle coat, snores loudly',
-    contactInfo: 'michelle@email.com',
-    isActive: true
-  },
-  {
-    id: '14',
-    status: 'found',
-    photo: 'https://images.pexels.com/photos/1276553/pexels-photo-1276553.jpeg',
-    location: 'Albuquerque, New Mexico',
-    date: '2025-01-22',
-    description: 'Siamese cat, cream and brown points, blue eyes, very vocal',
-    contactInfo: 'thomas@email.com',
-    isActive: true
-  }
-];
+import { PetReport } from '../types/lostFound';
+import { fetchPetReports } from '../lib/lostFoundService';
 
 type SortOption = 'newest' | 'oldest' | 'nearest';
 type ActiveSection = 'all' | 'lost' | 'found';
 
+// Convert PetReport to PetCard format for compatibility with existing components
+const convertReportToPetCard = (report: PetReport): PetCard => ({
+  id: report.id,
+  status: report.type,
+  name: report.pet_name || undefined,
+  photo: report.photo_url,
+  location: report.location,
+  date: report.date_reported.split('T')[0], // Convert timestamp to date string
+  description: report.description,
+  contactInfo: report.contact_info,
+  isActive: report.status === 'active'
+});
+
 const LostFoundPage: React.FC = () => {
-  const [pets, setPets] = useState<PetCard[]>(mockPets);
-  const [filteredPets, setFilteredPets] = useState<PetCard[]>(mockPets);
+  const [pets, setPets] = useState<PetCard[]>([]);
+  const [filteredPets, setFilteredPets] = useState<PetCard[]>([]);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [reportType, setReportType] = useState<'lost' | 'found'>('lost');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<ActiveSection>('all');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [currentPage, setCurrentPage] = useState(1);
@@ -178,6 +42,36 @@ const LostFoundPage: React.FC = () => {
   });
 
   const PETS_PER_PAGE = 12;
+
+  // Load pets from database
+  const loadPets = async () => {
+    setLoading(true);
+    try {
+      const result = await fetchPetReports({
+        status: 'active' // Only fetch active reports
+      });
+      
+      if (result.data) {
+        const petCards = result.data.map(convertReportToPetCard);
+        setPets(petCards);
+        console.log('Loaded pets from database:', petCards.length);
+      } else if (result.error) {
+        console.error('Failed to load pets:', result.error);
+        // Show error to user but don't break the page
+        setPets([]);
+      }
+    } catch (error) {
+      console.error('Error loading pets:', error);
+      setPets([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load pets on component mount
+  useEffect(() => {
+    loadPets();
+  }, []);
 
   // Apply filters and sorting
   useEffect(() => {
@@ -249,21 +143,10 @@ const LostFoundPage: React.FC = () => {
     setIsReportModalOpen(true);
   };
 
-  const handleSubmitReport = (petData: Partial<PetCard>) => {
-    const newPet: PetCard = {
-      id: Date.now().toString(),
-      status: reportType,
-      photo: petData.photo || 'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-      location: petData.location || '',
-      date: new Date().toISOString().split('T')[0],
-      description: petData.description || '',
-      name: petData.name,
-      contactInfo: petData.contactInfo,
-      isActive: true
-    };
-
-    setPets(prev => [newPet, ...prev]);
+  const handleSubmitReport = async (petData: Partial<PetCard>) => {
+    // Close modal and reload pets to show the new report
     setIsReportModalOpen(false);
+    await loadPets(); // Reload pets from database
   };
 
   const handlePetSelect = (pet: PetCard) => {
@@ -385,6 +268,33 @@ const LostFoundPage: React.FC = () => {
               Showing {Math.min(displayedPets.length, filteredPets.length)} of {filteredPets.length} pets
               {activeSection !== 'all' && ` (${activeSection} only)`}
             </p>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && pets.length === 0 && (
+          <div className="max-w-6xl mx-auto px-4 pb-16">
+            <div className="text-center py-16">
+              <div className="text-6xl mb-4">🐾</div>
+              <h3 className="text-2xl font-bold text-gray-700 mb-2">No pets reported yet</h3>
+              <p className="text-gray-600 font-quicksand mb-8">
+                Be the first to help a pet find their way home! Report a lost or found pet to get started.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={() => handleReportPet('lost')}
+                  className="kawaii-button bg-kawaii-coral hover:bg-kawaii-coral/80 text-gray-700 font-bold py-3 px-6"
+                >
+                  Report Lost Pet
+                </button>
+                <button
+                  onClick={() => handleReportPet('found')}
+                  className="kawaii-button bg-kawaii-green hover:bg-kawaii-green-dark text-gray-700 font-bold py-3 px-6"
+                >
+                  Report Found Pet
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

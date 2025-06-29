@@ -19,15 +19,22 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
   const [hoveredPin, setHoveredPin] = useState<string | null>(null);
   const [selectedPin, setSelectedPin] = useState<string | null>(null);
 
-  // Mock coordinates for demonstration - in real app, these would come from geocoding
-  const generateMockCoordinates = (location: string, index: number): { lat: number; lng: number } => {
-    // Generate coordinates around major US cities based on location
-    const cityCoords: { [key: string]: { lat: number; lng: number } } = {
+  // Generate coordinates based on location string
+  const generateCoordinatesFromLocation = (location: string, index: number): { lat: number; lng: number } => {
+    // Base coordinates for major cities/regions
+    const locationCoords: { [key: string]: { lat: number; lng: number } } = {
+      // US Cities
       'new york': { lat: 40.7128, lng: -74.0060 },
+      'nyc': { lat: 40.7128, lng: -74.0060 },
+      'manhattan': { lat: 40.7831, lng: -73.9712 },
+      'brooklyn': { lat: 40.6782, lng: -73.9442 },
+      'queens': { lat: 40.7282, lng: -73.7949 },
+      'bronx': { lat: 40.8448, lng: -73.8648 },
       'boston': { lat: 42.3601, lng: -71.0589 },
       'chicago': { lat: 41.8781, lng: -87.6298 },
       'seattle': { lat: 47.6062, lng: -122.3321 },
       'san francisco': { lat: 37.7749, lng: -122.4194 },
+      'los angeles': { lat: 34.0522, lng: -118.2437 },
       'miami': { lat: 25.7617, lng: -80.1918 },
       'austin': { lat: 30.2672, lng: -97.7431 },
       'denver': { lat: 39.7392, lng: -104.9903 },
@@ -36,31 +43,49 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
       'las vegas': { lat: 36.1699, lng: -115.1398 },
       'salt lake city': { lat: 40.7608, lng: -111.8910 },
       'albuquerque': { lat: 35.0844, lng: -106.6504 },
-      'portland': { lat: 45.5152, lng: -122.6784 }
+      'portland': { lat: 45.5152, lng: -122.6784 },
+      'atlanta': { lat: 33.7490, lng: -84.3880 },
+      'philadelphia': { lat: 39.9526, lng: -75.1652 },
+      'dallas': { lat: 32.7767, lng: -96.7970 },
+      'houston': { lat: 29.7604, lng: -95.3698 },
+      
+      // Parks and landmarks
+      'central park': { lat: 40.7829, lng: -73.9654 },
+      'golden gate park': { lat: 37.7694, lng: -122.4862 },
+      'millennium park': { lat: 41.8826, lng: -87.6226 },
+      'prospect park': { lat: 40.6602, lng: -73.9690 },
+      
+      // Generic regions
+      'downtown': { lat: 40.7589, lng: -73.9851 },
+      'uptown': { lat: 40.7831, lng: -73.9712 },
+      'midtown': { lat: 40.7549, lng: -73.9840 },
+      'suburbs': { lat: 40.7282, lng: -73.7949 }
     };
 
     const locationKey = location.toLowerCase();
     let baseCoords = { lat: 39.8283, lng: -98.5795 }; // Center of US as default
 
-    // Find matching city
-    for (const [city, coords] of Object.entries(cityCoords)) {
-      if (locationKey.includes(city)) {
+    // Find matching location
+    for (const [key, coords] of Object.entries(locationCoords)) {
+      if (locationKey.includes(key)) {
         baseCoords = coords;
         break;
       }
     }
 
-    // Add small random offset to avoid overlapping pins
-    const offset = 0.01;
+    // Add small random offset to avoid overlapping pins (0.01 degrees ≈ 1km)
+    const offset = 0.015;
+    const randomOffset = () => (Math.random() - 0.5) * offset;
+    
     return {
-      lat: baseCoords.lat + (Math.random() - 0.5) * offset,
-      lng: baseCoords.lng + (Math.random() - 0.5) * offset
+      lat: baseCoords.lat + randomOffset(),
+      lng: baseCoords.lng + randomOffset()
     };
   };
 
   const mapPins: MapPin[] = pets.map((pet, index) => ({
     id: pet.id,
-    ...generateMockCoordinates(pet.location, index),
+    ...generateCoordinatesFromLocation(pet.location, index),
     pet
   }));
 
@@ -68,10 +93,10 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
     // Simulate map loading
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 1500);
+    }, 1000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [pets]);
 
   const handlePinClick = (pin: MapPin) => {
     setSelectedPin(pin.id);
@@ -84,7 +109,9 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    if (diffDays === 1) {
+    if (diffDays === 0) {
+      return 'Today';
+    } else if (diffDays === 1) {
       return 'Yesterday';
     } else if (diffDays <= 7) {
       return `${diffDays} days ago`;
