@@ -118,6 +118,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
       if (result.error) {
         console.error('Error creating post:', result.error);
         setErrors({ submit: result.error });
+        setIsSubmitting(false);
       } else {
         console.log('Post created successfully:', result.data);
         // Success - clear form and close modal
@@ -133,7 +134,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
     } catch (error) {
       console.error('Unexpected error creating post:', error);
       setErrors({ submit: 'An unexpected error occurred. Please try again.' });
-    } finally {
       setIsSubmitting(false);
     }
   };

@@ -12,10 +12,13 @@ export const createPost = async (postData: {
   imageFile?: File | null;
 }): Promise<{ data?: ForumPost; error?: string }> => {
   try {
+    console.log('Creating post with data:', postData);
+    
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     if (userError || !user) {
+      console.error('User authentication error:', userError);
       return { error: 'You must be logged in to create a post' };
     }
 
@@ -34,27 +37,42 @@ export const createPost = async (postData: {
     // Upload image if provided
     let imageUrl = null;
     if (postData.imageFile) {
-      const fileName = `${Date.now()}-${postData.imageFile.name.replace(/\s+/g, '-')}`;
-      const filePath = `${user.id}/${fileName}`;
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('post-images')
-        .upload(filePath, postData.imageFile);
-      
-      if (uploadError) {
-        console.error('Error uploading image:', uploadError);
+      try {
+        const fileName = `${Date.now()}-${postData.imageFile.name.replace(/\s+/g, '-')}`;
+        const filePath = `${user.id}/${fileName}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('post-images')
+          .upload(filePath, postData.imageFile);
+        
+        if (uploadError) {
+          console.error('Error uploading image:', uploadError);
+          return { error: 'Failed to upload image: ' + uploadError.message };
+        }
+        
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('post-images')
+          .getPublicUrl(filePath);
+        
+        imageUrl = publicUrl;
+        console.log('Image uploaded successfully:', imageUrl);
+      } catch (uploadError) {
+        console.error('Unexpected error uploading image:', uploadError);
         return { error: 'Failed to upload image' };
       }
-      
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('post-images')
-        .getPublicUrl(filePath);
-      
-      imageUrl = publicUrl;
     }
 
     // Create the post in the database
+    console.log('Inserting post into database with data:', {
+      user_id: user.id,
+      title: postData.title,
+      content: postData.content,
+      category: postData.category,
+      tags: postData.tags,
+      image_url: imageUrl
+    });
+    
     const { data, error } = await supabase
       .from('forum_posts')
       .insert([{
@@ -73,6 +91,8 @@ export const createPost = async (postData: {
       return { error: 'Failed to create post: ' + error.message };
     }
 
+    console.log('Post created successfully in database:', data);
+
     // Format the post for the frontend
     const newPost: ForumPost = {
       id: data.id,
@@ -80,12 +100,12 @@ export const createPost = async (postData: {
       content: data.content,
       author: {
         id: user.id,
-        name: profile.user_name || user.email?.split('@')[0] || 'Anonymous',
-        avatar: profile.avatar_url || 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
+        name: profile?.user_name || user.email?.split('@')[0] || 'Anonymous',
+        avatar: profile?.avatar_url || 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
         reputation: 1,
       },
       category: data.category,
-      tags: data.tags,
+      tags: data.tags || [],
       replies: 0,
       views: 0,
       upvotes: 0,
@@ -95,12 +115,140 @@ export const createPost = async (postData: {
       hasImages: !!imageUrl
     };
 
-    console.log('Created post:', newPost);
-
+    console.log('Formatted post for frontend:', newPost);
     return { data: newPost };
   } catch (error) {
     console.error('Error creating post:', error);
     return { error: 'An unexpected error occurred while creating your post' };
+  }
+};
+
+/**
+ * Fetch forum posts with filtering and sorting
+ */
+export const fetchPosts = async (options: {
+  category?: string;
+  searchQuery?: string;
+  sortBy?: string;
+  page?: number;
+  limit?: number;
+}): Promise<{ data?: ForumPost[]; error?: string }> => {
+  try {
+    console.log('Fetching posts with options:', options);
+    
+    // Build the query
+    let query = supabase
+      .from('forum_posts')
+      .select(`
+        *,
+        users (
+          id,
+          user_name,
+          avatar_url
+        ),
+        post_votes (
+          id,
+          vote_type,
+          user_id
+        ),
+        post_follows (
+          id,
+          user_id
+        )
+      `);
+
+    // Apply category filter
+    if (options.category && options.category !== 'all') {
+      query = query.eq('category', options.category);
+    }
+
+    // Apply search filter
+    if (options.searchQuery) {
+      query = query.or(`title.ilike.%${options.searchQuery}%,content.ilike.%${options.searchQuery}%`);
+    }
+
+    // Apply sorting
+    if (options.sortBy) {
+      switch (options.sortBy) {
+        case 'newest':
+          query = query.order('created_at', { ascending: false });
+          break;
+        case 'popular':
+          // This would ideally use a more complex query with vote counts
+          query = query.order('view_count', { ascending: false });
+          break;
+        case 'unanswered':
+          // This would ideally check for posts with no comments
+          query = query.order('created_at', { ascending: false });
+          break;
+        default:
+          query = query.order('created_at', { ascending: false });
+      }
+    } else {
+      query = query.order('created_at', { ascending: false });
+    }
+
+    // Apply pagination
+    const page = options.page || 1;
+    const limit = options.limit || 10;
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    
+    query = query.range(from, to);
+
+    // Execute query
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching posts:', error);
+      return { error: 'Failed to fetch posts: ' + error.message };
+    }
+
+    console.log('Fetched posts from database:', data?.length || 0);
+
+    // Get current user to check if they've voted or followed
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Format posts for the frontend
+    const formattedPosts: ForumPost[] = data?.map(post => {
+      // Count votes
+      const upvotes = post.post_votes?.filter((vote: any) => vote.vote_type === 'up').length || 0;
+      const downvotes = post.post_votes?.filter((vote: any) => vote.vote_type === 'down').length || 0;
+      
+      // Check if user has followed this post
+      const isFollowing = user ? post.post_follows?.some((follow: any) => follow.user_id === user.id) : false;
+
+      return {
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        author: {
+          id: post.user_id,
+          name: post.users?.user_name || 'Anonymous',
+          avatar: post.users?.avatar_url || 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
+          reputation: 1, // This would come from a more complex query
+          badge: 'New Member' // This would be determined by reputation or other factors
+        },
+        category: post.category,
+        tags: post.tags || [],
+        replies: 0, // This would come from a count of comments
+        views: post.view_count || 0,
+        upvotes,
+        downvotes,
+        createdAt: post.created_at,
+        lastActivity: post.updated_at || post.created_at,
+        isPinned: post.is_pinned || false,
+        isSolved: post.is_solved || false,
+        isFollowing,
+        hasImages: !!post.image_url
+      };
+    }) || [];
+
+    console.log('Formatted posts for frontend:', formattedPosts.length);
+    return { data: formattedPosts };
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    return { error: 'An unexpected error occurred while fetching posts' };
   }
 };
 
@@ -239,126 +387,5 @@ export const togglePostFollow = async (
   } catch (error) {
     console.error('Error toggling post follow:', error);
     return { error: 'An unexpected error occurred while processing your request' };
-  }
-};
-
-/**
- * Get posts with filtering and sorting
- */
-export const getPosts = async (options: {
-  category?: string;
-  searchQuery?: string;
-  sortBy?: string;
-  page?: number;
-  limit?: number;
-}): Promise<{ data?: ForumPost[]; error?: string }> => {
-  try {
-    let query = supabase
-      .from('forum_posts')
-      .select(`
-        *,
-        users!forum_posts_user_id_fkey (
-          id,
-          user_name,
-          avatar_url
-        ),
-        post_votes (
-          id,
-          vote_type
-        ),
-        post_follows (
-          id
-        )
-      `);
-
-    // Apply category filter
-    if (options.category && options.category !== 'all') {
-      query = query.eq('category', options.category);
-    }
-
-    // Apply search filter
-    if (options.searchQuery) {
-      query = query.or(`title.ilike.%${options.searchQuery}%,content.ilike.%${options.searchQuery}%`);
-    }
-
-    // Apply sorting
-    if (options.sortBy) {
-      switch (options.sortBy) {
-        case 'newest':
-          query = query.order('created_at', { ascending: false });
-          break;
-        case 'popular':
-          // This would ideally use a more complex query with vote counts
-          query = query.order('view_count', { ascending: false });
-          break;
-        case 'unanswered':
-          // This would ideally check for posts with no comments
-          query = query.order('created_at', { ascending: false });
-          break;
-        default:
-          query = query.order('created_at', { ascending: false });
-      }
-    } else {
-      query = query.order('created_at', { ascending: false });
-    }
-
-    // Apply pagination
-    const page = options.page || 1;
-    const limit = options.limit || 10;
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-    
-    query = query.range(from, to);
-
-    // Execute query
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Error fetching posts:', error);
-      return { error: 'Failed to fetch posts' };
-    }
-
-    // Get current user to check if they've voted or followed
-    const { data: { user } } = await supabase.auth.getUser();
-
-    // Format posts for the frontend
-    const formattedPosts: ForumPost[] = data.map(post => {
-      // Count votes
-      const upvotes = post.post_votes.filter((vote: any) => vote.vote_type === 'up').length;
-      const downvotes = post.post_votes.filter((vote: any) => vote.vote_type === 'down').length;
-      
-      // Check if user has followed this post
-      const isFollowing = user ? post.post_follows.some((follow: any) => follow.user_id === user.id) : false;
-
-      return {
-        id: post.id,
-        title: post.title,
-        content: post.content,
-        author: {
-          id: post.user_id,
-          name: post.users.user_name || 'Anonymous',
-          avatar: post.users.avatar_url || 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
-          reputation: 1, // This would come from a more complex query
-          badge: 'New Member' // This would be determined by reputation or other factors
-        },
-        category: post.category,
-        tags: post.tags || [],
-        replies: 0, // This would come from a count of comments
-        views: post.view_count || 0,
-        upvotes,
-        downvotes,
-        createdAt: post.created_at,
-        lastActivity: post.updated_at,
-        isPinned: post.is_pinned || false,
-        isSolved: post.is_solved || false,
-        isFollowing,
-        hasImages: !!post.image_url
-      };
-    });
-
-    return { data: formattedPosts };
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-    return { error: 'An unexpected error occurred while fetching posts' };
   }
 };
