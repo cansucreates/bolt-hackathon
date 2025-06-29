@@ -175,10 +175,13 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
         
         // Convert base64 to blob and upload
         try {
+          const response = await fetch(initialImageData);
+          const blob = await response.blob();
+          const file = new File([blob], 'transferred-image.jpg', { type: 'image/jpeg' });
+          
           setIsUploading(true);
           setUploadProgress(0);
           
-          // Start progress animation
           const progressInterval = setInterval(() => {
             setUploadProgress(prev => {
               if (prev >= 90) {
@@ -189,13 +192,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
             });
           }, 200);
 
-          // Convert base64 to blob
-          const response = await fetch(initialImageData);
-          const blob = await response.blob();
-          const file = new File([blob], 'transferred-image.jpg', { type: 'image/jpeg' });
-          
-          console.log('Converted base64 to file:', { name: file.name, size: file.size, type: file.type });
-
           const uploadResult = await uploadPetImage(file);
           
           clearInterval(progressInterval);
@@ -204,7 +200,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
 
           if (uploadResult.error) {
             console.error('Initial image upload failed:', uploadResult.error);
-            setMessage({ type: 'error', text: `Upload failed: ${uploadResult.error}` });
+            setMessage({ type: 'error', text: uploadResult.error });
             setIsSubmitting(false);
             return;
           }
@@ -215,7 +211,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
           console.error('Error processing initial image:', error);
           setMessage({ type: 'error', text: 'Failed to process the uploaded image. Please try uploading again.' });
           setIsSubmitting(false);
-          setIsUploading(false);
           return;
         }
       }

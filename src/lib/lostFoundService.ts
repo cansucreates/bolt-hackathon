@@ -52,7 +52,7 @@ export const uploadPetImage = async (file: File): Promise<ImageUploadResult> => 
       return { url: '', error: 'Please select a valid image file (JPG, PNG, WEBP)' };
     }
     
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+    if (file.size > 10 * 1024 * 1024) { // Increased to 10MB limit to match form validation
       console.error('File too large:', file.size);
       return { url: '', error: 'Image size must be less than 10MB' };
     }
@@ -79,108 +79,32 @@ export const uploadPetImage = async (file: File): Promise<ImageUploadResult> => 
 
     console.log('Uploading to path:', filePath);
 
-    // Check if bucket exists and is accessible
-    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-    if (bucketsError) {
-      console.error('Error checking storage buckets:', bucketsError);
-      return { url: '', error: 'Storage service unavailable. Please try again later.' };
-    }
-    
-    const petImagesBucket = buckets.find(bucket => bucket.id === 'pet-images');
-    if (!petImagesBucket) {
-      console.error('Pet images bucket not found');
-      return { url: '', error: 'Storage bucket not configured. Please contact support.' };
-    }
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('pet-images')
+      .upload(filePath, compressedFile, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
-    console.log('Storage bucket verified, proceeding with upload...');
-
-    // Upload to Supabase Storage with retry logic
-    let uploadAttempts = 0;
-    const maxAttempts = 3;
-    let uploadError: any = null;
-    let uploadData: any = null;
-
-    while (uploadAttempts < maxAttempts) {
-      try {
-        uploadAttempts++;
-        console.log(`Upload attempt ${uploadAttempts}/${maxAttempts}`);
-
-        const { data, error } = await supabase.storage
-          .from('pet-images')
-          .upload(filePath, compressedFile, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: 'image/jpeg'
-          });
-
-        if (error) {
-          uploadError = error;
-          console.error(`Upload attempt ${uploadAttempts} failed:`, error);
-          
-          // If it's a duplicate file error, try with a new filename
-          if (error.message?.includes('duplicate') || error.message?.includes('already exists')) {
-            const newFileName = `${Date.now()}-${Math.random().toString(36).substring(2)}-retry.${fileExt}`;
-            filePath = `${user.id}/${newFileName}`;
-            console.log('Retrying with new filename:', filePath);
-            continue;
-          }
-          
-          // For other errors, wait a bit before retrying
-          if (uploadAttempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 1000 * uploadAttempts));
-            continue;
-          }
-        } else {
-          uploadData = data;
-          uploadError = null;
-          break;
-        }
-      } catch (error) {
-        uploadError = error;
-        console.error(`Upload attempt ${uploadAttempts} threw error:`, error);
-        
-        if (uploadAttempts < maxAttempts) {
-          await new Promise(resolve => setTimeout(resolve, 1000 * uploadAttempts));
-        }
-      }
+    if (error) {
+      console.error('Storage upload error:', error);
+      return { url: '', error: `Failed to upload image: ${error.message}` };
     }
 
-    if (uploadError || !uploadData) {
-      console.error('All upload attempts failed:', uploadError);
-      return { 
-        url: '', 
-        error: `Failed to upload image after ${maxAttempts} attempts: ${uploadError?.message || 'Unknown error'}` 
-      };
-    }
-
-    console.log('Upload successful:', uploadData);
+    console.log('Upload successful:', data);
 
     // Get public URL
     const { data: { publicUrl } } = supabase.storage
       .from('pet-images')
-      .getPublicUrl(uploadData.path);
+      .getPublicUrl(data.path);
 
     console.log('Public URL generated:', publicUrl);
-
-    // Verify the uploaded file is accessible
-    try {
-      const response = await fetch(publicUrl, { method: 'HEAD' });
-      if (!response.ok) {
-        console.error('Uploaded file not accessible:', response.status, response.statusText);
-        return { url: '', error: 'Image uploaded but not accessible. Please try again.' };
-      }
-    } catch (error) {
-      console.error('Error verifying uploaded file:', error);
-      // Don't fail here, the file might still be accessible
-    }
 
     return { url: publicUrl };
   } catch (error) {
     console.error('Image upload error:', error);
-    return { 
-      url: '', 
-      error: `Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}` 
-    };
+    return { url: '', error: `Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}` };
   }
 };
 
