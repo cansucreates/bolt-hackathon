@@ -52,9 +52,9 @@ export const uploadPetImage = async (file: File): Promise<ImageUploadResult> => 
       return { url: '', error: 'Please select a valid image file (JPG, PNG, WEBP)' };
     }
     
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
       console.error('File too large:', file.size);
-      return { url: '', error: 'Image size must be less than 5MB' };
+      return { url: '', error: 'Image size must be less than 10MB' };
     }
 
     // Get current user
@@ -75,36 +75,112 @@ export const uploadPetImage = async (file: File): Promise<ImageUploadResult> => 
     // Generate unique filename with user folder
     const fileExt = 'jpg';
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const filePath = `${user.id}/${fileName}`;
+    let filePath = `${user.id}/${fileName}`;
 
     console.log('Uploading to path:', filePath);
 
-    // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
-      .from('pet-images')
-      .upload(filePath, compressedFile, {
-        cacheControl: '3600',
-        upsert: false
-      });
-
-    if (error) {
-      console.error('Storage upload error:', error);
-      return { url: '', error: 'Failed to upload image. Please try again.' };
+    // Check if bucket exists and is accessible
+    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+    if (bucketsError) {
+      console.error('Error checking storage buckets:', bucketsError);
+      return { url: '', error: 'Storage service unavailable. Please try again later.' };
+    }
+    
+    const petImagesBucket = buckets.find(bucket => bucket.id === 'pet-images');
+    if (!petImagesBucket) {
+      console.error('Pet images bucket not found');
+      return { url: '', error: 'Storage bucket not configured. Please contact support.' };
     }
 
-    console.log('Upload successful:', data);
+    console.log('Storage bucket verified, proceeding with upload...');
+
+    // Upload to Supabase Storage with retry logic
+    let uploadAttempts = 0;
+    const maxAttempts = 3;
+    let uploadError: any = null;
+    let uploadData: any = null;
+
+    while (uploadAttempts < maxAttempts) {
+      try {
+        uploadAttempts++;
+        console.log(`Upload attempt ${uploadAttempts}/${maxAttempts}`);
+
+        const { data, error } = await supabase.storage
+          .from('pet-images')
+          .upload(filePath, compressedFile, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: 'image/jpeg'
+          });
+
+        if (error) {
+          uploadError = error;
+          console.error(`Upload attempt ${uploadAttempts} failed:`, error);
+          
+          // If it's a duplicate file error, try with a new filename
+          if (error.message?.includes('duplicate') || error.message?.includes('already exists')) {
+            const newFileName = `${Date.now()}-${Math.random().toString(36).substring(2)}-retry.${fileExt}`;
+            filePath = `${user.id}/${newFileName}`;
+            console.log('Retrying with new filename:', filePath);
+            continue;
+          }
+          
+          // For other errors, wait a bit before retrying
+          if (uploadAttempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * uploadAttempts));
+            continue;
+          }
+        } else {
+          uploadData = data;
+          uploadError = null;
+          break;
+        }
+      } catch (error) {
+        uploadError = error;
+        console.error(`Upload attempt ${uploadAttempts} threw error:`, error);
+        
+        if (uploadAttempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * uploadAttempts));
+        }
+      }
+    }
+
+    if (uploadError || !uploadData) {
+      console.error('All upload attempts failed:', uploadError);
+      return { 
+        url: '', 
+        error: `Failed to upload image after ${maxAttempts} attempts: ${uploadError?.message || 'Unknown error'}` 
+      };
+    }
+
+    console.log('Upload successful:', uploadData);
 
     // Get public URL
     const { data: { publicUrl } } = supabase.storage
       .from('pet-images')
-      .getPublicUrl(data.path);
+      .getPublicUrl(uploadData.path);
 
     console.log('Public URL generated:', publicUrl);
+
+    // Verify the uploaded file is accessible
+    try {
+      const response = await fetch(publicUrl, { method: 'HEAD' });
+      if (!response.ok) {
+        console.error('Uploaded file not accessible:', response.status, response.statusText);
+        return { url: '', error: 'Image uploaded but not accessible. Please try again.' };
+      }
+    } catch (error) {
+      console.error('Error verifying uploaded file:', error);
+      // Don't fail here, the file might still be accessible
+    }
 
     return { url: publicUrl };
   } catch (error) {
     console.error('Image upload error:', error);
-    return { url: '', error: 'Failed to upload image. Please try again.' };
+    return { 
+      url: '', 
+      error: `Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    };
   }
 };
 
@@ -114,29 +190,55 @@ export const submitPetReport = async (data: PetReportData): Promise<{ data?: Pet
     console.log('Starting pet report submission...');
     console.log('Report data:', data);
     
-    const { data: user } = await supabase.auth.getUser();
+    // Validate required fields
+    if (!data.description || !data.location || !data.contact_info || !data.photo_url) {
+      console.error('Missing required fields:', {
+        description: !!data.description,
+        location: !!data.location,
+        contact_info: !!data.contact_info,
+        photo_url: !!data.photo_url
+      });
+      return { error: 'Please fill in all required fields including photo, description, location, and contact information.' };
+    }
     
-    if (!user.user) {
-      console.error('User not authenticated');
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !user) {
+      console.error('User not authenticated:', userError);
       return { error: 'You must be logged in to submit a report' };
     }
 
-    console.log('User authenticated for submission:', user.user.id);
+    console.log('User authenticated for submission:', user.id);
 
-    // Prepare report data
+    // Prepare report data with proper field mapping
     const reportData = {
-      user_id: user.user.id,
+      user_id: user.id,
       type: data.type,
-      pet_name: data.pet_name || null,
-      description: data.description,
+      pet_name: data.pet_name || null, // This can be null for found pets
+      description: data.description.trim(),
       photo_url: data.photo_url,
-      location: data.location,
-      contact_info: data.contact_info,
-      status: 'active' as const
+      location: data.location.trim(),
+      contact_info: data.contact_info.trim(),
+      status: 'active' as const,
+      date_reported: new Date().toISOString()
     };
 
     console.log('Submitting to database:', reportData);
 
+    // Test database connection first
+    const { data: testData, error: testError } = await supabase
+      .from('lost_found_pets')
+      .select('count')
+      .limit(1);
+
+    if (testError) {
+      console.error('Database connection test failed:', testError);
+      return { error: 'Database connection failed. Please try again.' };
+    }
+
+    console.log('Database connection test passed');
+
+    // Submit the report
     const { data: report, error } = await supabase
       .from('lost_found_pets')
       .insert([reportData])
@@ -145,6 +247,12 @@ export const submitPetReport = async (data: PetReportData): Promise<{ data?: Pet
 
     if (error) {
       console.error('Database submission error:', error);
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      });
       
       // Provide more specific error messages
       if (error.code === '23505') {
@@ -153,6 +261,8 @@ export const submitPetReport = async (data: PetReportData): Promise<{ data?: Pet
         return { error: 'Missing required information. Please fill in all required fields.' };
       } else if (error.code === '42501') {
         return { error: 'Permission denied. Please make sure you are logged in.' };
+      } else if (error.code === '23503') {
+        return { error: 'Invalid user reference. Please try logging out and back in.' };
       } else {
         return { error: `Database error: ${error.message}` };
       }
@@ -162,7 +272,7 @@ export const submitPetReport = async (data: PetReportData): Promise<{ data?: Pet
     return { data: report };
   } catch (error) {
     console.error('Unexpected submission error:', error);
-    return { error: 'An unexpected error occurred. Please try again.' };
+    return { error: `An unexpected error occurred: ${error instanceof Error ? error.message : 'Unknown error'}` };
   }
 };
 

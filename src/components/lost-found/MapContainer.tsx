@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Loader, Eye, Calendar, PawPrint, Heart } from 'lucide-react';
+import { MapPin, Loader, Eye, Calendar, PawPrint as Paw, Heart } from 'lucide-react';
 import { PetCard } from '../../types/pet';
 
 interface MapContainerProps {
@@ -214,7 +214,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
                       : 'bg-kawaii-green-dark'
                   }`}>
                     {pin.pet.status === 'lost' ? (
-                      <PawPrint size={16} className="text-gray-700" />
+                      <Paw size={16} className="text-gray-700" />
                     ) : (
                       <Heart size={16} className="text-gray-700" />
                     )}
@@ -232,7 +232,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
                         {pin.pet.status === 'lost' ? (
-                          <PawPrint size={14} className="text-kawaii-coral" />
+                          <Paw size={14} className="text-kawaii-coral" />
                         ) : (
                           <Heart size={14} className="text-kawaii-green-dark" />
                         )}
@@ -271,7 +271,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-8 bg-kawaii-coral rounded-t-full border-2 border-white shadow-sm flex items-center justify-center relative">
-                  <PawPrint size={12} className="text-gray-700" />
+                  <Paw size={12} className="text-gray-700" />
                   <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-kawaii-coral"></div>
                 </div>
                 <span className="text-xs text-gray-700 font-quicksand">Lost Pets</span>
@@ -314,7 +314,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
                         : 'bg-kawaii-green-dark'
                     }`}>
                       {selectedPet.status === 'lost' ? (
-                        <PawPrint size={20} className="text-gray-700" />
+                        <Paw size={20} className="text-gray-700" />
                       ) : (
                         <Heart size={20} className="text-gray-700" />
                       )}
