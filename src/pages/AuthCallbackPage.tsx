@@ -18,14 +18,13 @@ const AuthCallbackPage: React.FC = () => {
         console.log('Current URL:', window.location.href);
         console.log('URL search params:', window.location.search);
 
-        // Handle the OAuth callback by exchanging the code for a session
-        const { data, error: authError } = await supabase.auth.getSession();
+        // Get the code from the URL
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
         
-        if (authError) {
-          console.error('Auth callback error:', authError);
-          setError('Authentication failed. Please try again.');
-          
-          // Redirect to home page with error state after a delay
+        if (!code) {
+          console.error('No code found in URL');
+          setError('Authentication failed. No code parameter found.');
           setTimeout(() => {
             navigate('/', { 
               replace: true, 
@@ -37,93 +36,48 @@ const AuthCallbackPage: React.FC = () => {
           return;
         }
 
-        if (data.session) {
-          // Successfully authenticated
-          console.log('Authentication successful for user:', data.session.user.email);
+        console.log('Found code in URL, exchanging for session...');
+        
+        // Exchange the code for a session
+        const { data, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
+        
+        if (sessionError) {
+          console.error('Error exchanging code for session:', sessionError);
+          setError(`Authentication failed: ${sessionError.message}`);
           
-          // Show success message briefly before redirecting
+          setTimeout(() => {
+            navigate('/', { 
+              replace: true, 
+              state: { 
+                authError: `Authentication failed: ${sessionError.message}` 
+              } 
+            });
+          }, 2000);
+          return;
+        }
+
+        if (data.session) {
+          console.log('Successfully exchanged code for session:', data.session.user.email);
           setIsProcessing(false);
           
-          // Redirect to home page after a short delay
           setTimeout(() => {
             navigate('/', { 
               replace: true,
               state: { 
-                authSuccess: `Welcome back, ${data.session.user.email}!` 
+                authSuccess: `Welcome, ${data.session.user.email}!` 
               }
             });
           }, 1500);
+          return;
         } else {
-          // No session found - try to handle the OAuth callback manually
-          console.log('No session found, attempting to handle OAuth callback...');
-          
-          // Check if we have OAuth parameters in the URL
-          const urlParams = new URLSearchParams(window.location.search);
-          const code = urlParams.get('code');
-          const error_code = urlParams.get('error');
-          const error_description = urlParams.get('error_description');
-
-          if (error_code) {
-            console.error('OAuth error:', error_code, error_description);
-            setError(`Authentication failed: ${error_description || error_code}`);
-            
-            setTimeout(() => {
-              navigate('/', { 
-                replace: true,
-                state: { 
-                  authError: `Authentication failed: ${error_description || 'Please try again.'}` 
-                }
-              });
-            }, 2000);
-            return;
-          }
-
-          if (code) {
-            console.log('Found OAuth code, exchanging for session...');
-            
-            // Exchange the code for a session
-            const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
-            
-            if (sessionError) {
-              console.error('Error exchanging code for session:', sessionError);
-              setError('Failed to complete authentication. Please try again.');
-              
-              setTimeout(() => {
-                navigate('/', { 
-                  replace: true,
-                  state: { 
-                    authError: 'Failed to complete authentication. Please try again.' 
-                  }
-                });
-              }, 2000);
-              return;
-            }
-
-            if (sessionData.session) {
-              console.log('Successfully exchanged code for session:', sessionData.session.user.email);
-              setIsProcessing(false);
-              
-              setTimeout(() => {
-                navigate('/', { 
-                  replace: true,
-                  state: { 
-                    authSuccess: `Welcome, ${sessionData.session.user.email}!` 
-                  }
-                });
-              }, 1500);
-              return;
-            }
-          }
-
-          // If we get here, something went wrong
-          console.warn('No session or OAuth code found in callback');
-          setError('Authentication session not found.');
+          console.error('No session returned after code exchange');
+          setError('Authentication failed. No session returned.');
           
           setTimeout(() => {
             navigate('/', { 
               replace: true,
               state: { 
-                authError: 'Authentication session not found. Please try again.' 
+                authError: 'Authentication failed. Please try again.' 
               }
             });
           }, 2000);
