@@ -1,6 +1,39 @@
 import { supabase } from './supabase';
 import { DonationTransaction, DonationFormData, DonationStats } from '../types/donation';
-import { createPaymentIntent, confirmPayment } from './stripeService';
+
+// Stripe integration (mock implementation - replace with actual Stripe)
+const processStripePayment = async (
+  amount: number,
+  paymentMethod: string,
+  customerInfo: any
+): Promise<{ success: boolean; paymentIntentId?: string; error?: string }> => {
+  // Mock Stripe payment processing
+  // In production, this would integrate with Stripe's API
+  try {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Mock success/failure (90% success rate)
+    const isSuccess = Math.random() > 0.1;
+    
+    if (isSuccess) {
+      return {
+        success: true,
+        paymentIntentId: `pi_mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      };
+    } else {
+      return {
+        success: false,
+        error: 'Payment failed. Please check your card details and try again.'
+      };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Payment processing error. Please try again.'
+    };
+  }
+};
 
 // Process donation
 export const processDonation = async (
@@ -22,43 +55,45 @@ export const processDonation = async (
       };
     }
 
-    // Create a payment intent with Stripe
-    const { clientSecret, error: stripeError } = await createPaymentIntent(
+    // Process payment with Stripe
+    const paymentResult = await processStripePayment(
       donationData.amount,
-      'usd',
+      donationData.paymentMethod,
       {
-        campaignId,
-        donorId: user.id,
-        isRecurring: donationData.isRecurring ? 'true' : 'false',
-        isAnonymous: donationData.isAnonymous ? 'true' : 'false'
+        name: donationData.donorName,
+        email: donationData.donorEmail
       }
     );
 
-    if (stripeError || !clientSecret) {
+    if (!paymentResult.success) {
       return {
         success: false,
-        error: stripeError || 'Failed to create payment intent'
+        error: paymentResult.error || 'Payment processing failed'
       };
     }
 
-    // In a real implementation, the payment would be confirmed on the client side
-    // and then the server would create a donation record in the database
-    // For now, we'll simulate a successful transaction
-    const mockTransaction: DonationTransaction = {
-      id: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    // Create donation transaction record
+    const transactionData = {
       campaign_id: campaignId,
       donor_id: user.id,
       amount: donationData.amount,
       currency: 'USD',
       payment_method: donationData.paymentMethod,
-      stripe_payment_intent_id: clientSecret.split('_secret_')[0],
+      stripe_payment_intent_id: paymentResult.paymentIntentId,
       is_anonymous: donationData.isAnonymous,
       is_recurring: donationData.isRecurring,
-      recurring_frequency: donationData.recurringFrequency,
-      donor_name: donationData.isAnonymous ? undefined : donationData.donorName,
+      recurring_frequency: donationData.recurringFrequency || null,
+      donor_name: donationData.isAnonymous ? null : donationData.donorName,
       donor_email: donationData.donorEmail,
-      donor_message: donationData.donorMessage,
-      status: 'completed',
+      donor_message: donationData.donorMessage || null,
+      status: 'completed' as const
+    };
+
+    // In a real implementation, this would save to the database
+    // For now, we'll simulate a successful transaction
+    const mockTransaction: DonationTransaction = {
+      id: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      ...transactionData,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
