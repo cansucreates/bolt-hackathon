@@ -18,7 +18,6 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
   const [loading, setLoading] = useState(true);
   const [hoveredPin, setHoveredPin] = useState<string | null>(null);
   const [selectedPin, setSelectedPin] = useState<string | null>(null);
-  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 39.8283, lng: -98.5795 }); // Default to center of US
 
   // Generate coordinates based on location string
   const generateCoordinatesFromLocation = (location: string, index: number): { lat: number; lng: number } => {
@@ -63,52 +62,26 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
       'suburbs': { lat: 40.7282, lng: -73.7949 }
     };
 
-    // Default to center of US
-    let baseCoords = { lat: 39.8283, lng: -98.5795 };
-    let foundMatch = false;
+    const locationKey = location.toLowerCase();
+    let baseCoords = { lat: 39.8283, lng: -98.5795 }; // Center of US as default
 
     // Find matching location
-    const locationKey = location.toLowerCase();
     for (const [key, coords] of Object.entries(locationCoords)) {
       if (locationKey.includes(key)) {
         baseCoords = coords;
-        foundMatch = true;
         break;
       }
     }
 
-    // If we found a match, use a smaller offset to keep pins clustered
-    // If no match, use a larger offset to spread pins around the center
-    const offset = foundMatch ? 0.005 : 0.05;
+    // Add small random offset to avoid overlapping pins (0.01 degrees ≈ 1km)
+    const offset = 0.015;
+    const randomOffset = () => (Math.random() - 0.5) * offset;
     
-    // Use a circular pattern for distributing pins
-    const angle = (index * 30) % 360; // Distribute pins in a circle
-    const radius = 0.005 + (index % 5) * 0.002; // Vary the distance from center
-    
-    const lat = baseCoords.lat + radius * Math.cos(angle * Math.PI / 180);
-    const lng = baseCoords.lng + radius * Math.sin(angle * Math.PI / 180);
-    
-    return { lat, lng };
+    return {
+      lat: baseCoords.lat + randomOffset(),
+      lng: baseCoords.lng + randomOffset()
+    };
   };
-
-  // Calculate map center based on all pins
-  useEffect(() => {
-    if (pets.length === 0) return;
-    
-    // Generate all coordinates
-    const allCoords = pets.map((pet, index) => 
-      generateCoordinatesFromLocation(pet.location, index)
-    );
-    
-    // Calculate average lat/lng as the center
-    const sumLat = allCoords.reduce((sum, coord) => sum + coord.lat, 0);
-    const sumLng = allCoords.reduce((sum, coord) => sum + coord.lng, 0);
-    
-    setMapCenter({
-      lat: sumLat / allCoords.length,
-      lng: sumLng / allCoords.length
-    });
-  }, [pets]);
 
   const mapPins: MapPin[] = pets.map((pet, index) => ({
     id: pet.id,
@@ -133,23 +106,14 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    
-    // Check if it's today
-    if (date.toDateString() === now.toDateString()) {
-      return 'Today';
-    }
-    
-    // Check if it's yesterday
-    const yesterday = new Date(now);
-    yesterday.setDate(now.getDate() - 1);
-    if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
-    }
-    
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    if (diffDays <= 7) {
+    if (diffDays === 0) {
+      return 'Today';
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays <= 7) {
       return `${diffDays} days ago`;
     } else {
       return date.toLocaleDateString('en-US', { 
@@ -211,24 +175,18 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
             </svg>
           </div>
 
-          {/* Map Center Indicator */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-blue-500/30 rounded-full border border-blue-500/50 z-20"></div>
-
           {/* Map Pins - z-index 30 */}
           {mapPins.map((pin) => {
-            // Calculate position relative to map center
-            const relX = (pin.lng - mapCenter.lng) * 1000; // Scale for visibility
-            const relY = (mapCenter.lat - pin.lat) * 1000; // Invert Y axis
+            const x = ((pin.lng + 180) / 360) * 100; // Convert lng to percentage
+            const y = ((90 - pin.lat) / 180) * 100; // Convert lat to percentage (inverted)
             
-            // Position pins around the center of the map
-            // Use percentage-based positioning with transforms
             return (
               <div
                 key={pin.id}
                 className="absolute transform -translate-x-1/2 -translate-y-full cursor-pointer transition-all duration-300 hover:scale-110 z-30"
                 style={{ 
-                  left: `calc(50% + ${relX}%)`, 
-                  top: `calc(50% + ${relY}%)` 
+                  left: `${Math.max(5, Math.min(95, x))}%`, 
+                  top: `${Math.max(5, Math.min(95, y))}%` 
                 }}
                 onClick={() => handlePinClick(pin)}
                 onMouseEnter={() => setHoveredPin(pin.id)}
