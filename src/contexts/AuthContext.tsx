@@ -167,12 +167,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       console.log('Initiating Google OAuth with redirect to:', redirectTo);
       
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo,
+          redirectTo: redirectTo,
           queryParams: {
-            prompt: 'select_account'
+            access_type: 'offline',
+            prompt: 'consent',
           }
         }
       });
