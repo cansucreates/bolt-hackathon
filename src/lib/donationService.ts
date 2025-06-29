@@ -45,8 +45,14 @@ export const processDonation = async (
 
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError) {
+    
+    // Check for authentication errors or missing user
+    if (userError || !user) {
       console.error('User authentication error:', userError);
+      return {
+        success: false,
+        error: userError?.message || 'Authentication required to process donation.'
+      };
     }
 
     // Process payment with Stripe
@@ -69,7 +75,7 @@ export const processDonation = async (
     // Create donation transaction record
     const transactionData = {
       campaign_id: campaignId,
-      donor_id: user?.id || null,
+      donor_id: user.id,
       amount: donationData.amount,
       currency: 'USD',
       payment_method: donationData.paymentMethod,
