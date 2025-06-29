@@ -34,7 +34,7 @@ const DonationPage: React.FC = () => {
     } else if (canceled === 'true') {
       setMessage({ 
         type: 'error', 
-        text: 'Your donation was canceled. Please try again if you'd like to support our cause.' 
+        text: 'Your donation was canceled. Please try again if you\'d like to support our cause.' 
       });
       // Clean up URL
       navigate('/donations', { replace: true });
