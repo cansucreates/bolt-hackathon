@@ -28,6 +28,8 @@ export const submitAdoptionApplication = async (
       updated_at: new Date().toISOString()
     };
 
+    console.log('Submitting application data:', applicationData);
+
     // Insert application into Supabase
     const { data, error } = await supabase
       .from('adoption_applications')
@@ -116,7 +118,7 @@ export const getUserAdoptionApplications = async (): Promise<{
 
     const { data, error } = await supabase
       .from('adoption_applications')
-      .select('*, pets:pet_id(*)')
+      .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -125,14 +127,7 @@ export const getUserAdoptionApplications = async (): Promise<{
       return { error: 'Failed to fetch adoption applications' };
     }
 
-    // Transform data to match AdoptionApplication interface
-    const applications = data.map(app => ({
-      ...app,
-      pet_name: app.pets?.name,
-      pet_photo: app.pets?.photo
-    }));
-
-    return { data: applications };
+    return { data: data as AdoptionApplication[] };
   } catch (error) {
     console.error('Error fetching adoption applications:', error);
     return { error: 'Failed to fetch adoption applications' };
