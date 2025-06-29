@@ -21,13 +21,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 's
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string>('');
 
   const { signUp, signIn, signInWithGoogle, resetPassword } = useAuth();
   const location = useLocation();
-
-  // Add timeout for authentication operations
-  const AUTH_TIMEOUT = 30000; // 30 seconds
 
   // Reset mode when modal opens with different initialMode
   useEffect(() => {
@@ -38,7 +34,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 's
       setErrors({});
       setMessage(null);
       setShowPassword(false);
-      setDebugInfo('');
     }
   }, [isOpen, initialMode]);
 
@@ -87,15 +82,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 's
     return Object.keys(newErrors).length === 0;
   };
 
-  const withTimeout = <T,>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
-    return Promise.race([
-      promise,
-      new Promise<T>((_, reject) =>
-        setTimeout(() => reject(new Error('Operation timed out')), timeoutMs)
-      )
-    ]);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -103,66 +89,46 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 's
 
     setIsLoading(true);
     setMessage(null);
-    setDebugInfo('Starting authentication...');
 
     try {
       if (mode === 'signup') {
-        setDebugInfo('Creating new account...');
-        
-        const signUpPromise = signUp(formData.email, formData.password, {
+        const { error } = await signUp(formData.email, formData.password, {
           user_name: formData.userName
         });
         
-        const { error } = await withTimeout(signUpPromise, AUTH_TIMEOUT);
-        
         if (error) {
-          console.error('Sign up error:', error);
           setMessage({ type: 'error', text: error.message });
-          setDebugInfo(`Sign up failed: ${error.message}`);
         } else {
           setMessage({ 
             type: 'success', 
             text: 'Account created successfully! Please check your email to verify your account.' 
           });
-          setDebugInfo('Account created successfully');
         }
       } else if (mode === 'signin') {
-        setDebugInfo('Signing in...');
-        
-        const signInPromise = signIn(formData.email, formData.password);
-        const { error } = await withTimeout(signInPromise, AUTH_TIMEOUT);
+        const { error } = await signIn(formData.email, formData.password);
         
         if (error) {
-          console.error('Sign in error:', error);
           setMessage({ type: 'error', text: error.message });
-          setDebugInfo(`Sign in failed: ${error.message}`);
         } else {
-          setDebugInfo('Sign in successful');
           onClose();
         }
       } else if (mode === 'forgot') {
-        setDebugInfo('Sending password reset email...');
-        
-        const resetPromise = resetPassword(formData.email);
-        const { error } = await withTimeout(resetPromise, AUTH_TIMEOUT);
+        const { error } = await resetPassword(formData.email);
         
         if (error) {
-          console.error('Password reset error:', error);
           setMessage({ type: 'error', text: error.message });
-          setDebugInfo(`Password reset failed: ${error.message}`);
         } else {
           setMessage({ 
             type: 'success', 
             text: 'Password reset email sent! Please check your inbox.' 
           });
-          setDebugInfo('Password reset email sent');
         }
       }
     } catch (error) {
-      console.error('Authentication error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-      setMessage({ type: 'error', text: errorMessage });
-      setDebugInfo(`Error: ${errorMessage}`);
+      setMessage({ 
+        type: 'error', 
+        text: 'An unexpected error occurred. Please try again.' 
+      });
     } finally {
       setIsLoading(false);
     }
@@ -171,27 +137,21 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 's
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     setMessage(null);
-    setDebugInfo('Initiating Google sign in...');
 
     try {
-      const googleSignInPromise = signInWithGoogle();
-      const { error } = await withTimeout(googleSignInPromise, AUTH_TIMEOUT);
+      const { error } = await signInWithGoogle();
       
       if (error) {
-        console.error('Google sign in error:', error);
         setMessage({ type: 'error', text: error.message });
-        setDebugInfo(`Google sign in failed: ${error.message}`);
         setIsLoading(false);
-      } else {
-        setDebugInfo('Google sign in initiated - redirecting...');
       }
       // Note: For successful Google OAuth, the user will be redirected
       // so we don't need to handle the success case here
     } catch (error) {
-      console.error('Google sign in error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Google';
-      setMessage({ type: 'error', text: errorMessage });
-      setDebugInfo(`Google sign in error: ${errorMessage}`);
+      setMessage({ 
+        type: 'error', 
+        text: 'Failed to sign in with Google. Please try again.' 
+      });
       setIsLoading(false);
     }
   };
@@ -200,7 +160,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 's
     setFormData({ email: '', password: '', confirmPassword: '', userName: '' });
     setErrors({});
     setMessage(null);
-    setDebugInfo('');
   };
 
   const switchMode = (newMode: 'signin' | 'signup' | 'forgot') => {
@@ -225,7 +184,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 's
         <div className="text-center mb-6 sm:mb-8 pr-8">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
             {mode === 'signin' && 'Welcome Back!'}
-            {mode === 'signup' && 'Join PawBackHome'}
+            {mode === 'signup' && 'Join PawConnect'}
             {mode === 'forgot' && 'Reset Password'}
           </h2>
           <p className="text-sm sm:text-base text-gray-600 font-quicksand px-2">
@@ -234,13 +193,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 's
             {mode === 'forgot' && 'Enter your email to reset your password'}
           </p>
         </div>
-
-        {/* Debug Info (only in development) */}
-        {process.env.NODE_ENV === 'development' && debugInfo && (
-          <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-            Debug: {debugInfo}
-          </div>
-        )}
 
         {/* Message Display */}
         {message && (
@@ -273,7 +225,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 's
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
               <span className="font-semibold text-gray-700 group-hover:text-gray-800 text-sm sm:text-base">
-                {isLoading ? 'Loading...' : mode === 'signin' ? 'Sign in with Google' : 'Sign up with Google'}
+                {mode === 'signin' ? 'Sign in with Google' : 'Sign up with Google'}
               </span>
             </button>
 
@@ -402,7 +354,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 's
             {isLoading ? (
               <div className="flex items-center justify-center gap-2">
                 <div className="w-4 h-4 border-2 border-gray-700 border-t-transparent rounded-full animate-spin"></div>
-                {mode === 'signin' ? 'Signing In...' : mode === 'signup' ? 'Creating Account...' : 'Sending Email...'}
+                Loading...
               </div>
             ) : (
               <>
