@@ -168,13 +168,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
         console.log('Image uploaded successfully:', photoUrl);
       }
 
-      // Validate that we have a photo URL
-      if (!photoUrl) {
-        setMessage({ type: 'error', text: 'Photo is required. Please upload an image.' });
-        setIsSubmitting(false);
-        return;
-      }
-
       // Submit report
       console.log('Submitting pet report...');
       const reportData = {

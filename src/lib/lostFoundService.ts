@@ -52,9 +52,9 @@ export const uploadPetImage = async (file: File): Promise<ImageUploadResult> => 
       return { url: '', error: 'Please select a valid image file (JPG, PNG, WEBP)' };
     }
     
-    if (file.size > 10 * 1024 * 1024) { // Increased to 10MB limit to match form validation
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
       console.error('File too large:', file.size);
-      return { url: '', error: 'Image size must be less than 10MB' };
+      return { url: '', error: 'Image size must be less than 5MB' };
     }
 
     // Get current user
@@ -89,7 +89,7 @@ export const uploadPetImage = async (file: File): Promise<ImageUploadResult> => 
 
     if (error) {
       console.error('Storage upload error:', error);
-      return { url: '', error: `Failed to upload image: ${error.message}` };
+      return { url: '', error: 'Failed to upload image. Please try again.' };
     }
 
     console.log('Upload successful:', data);
@@ -104,7 +104,7 @@ export const uploadPetImage = async (file: File): Promise<ImageUploadResult> => 
     return { url: publicUrl };
   } catch (error) {
     console.error('Image upload error:', error);
-    return { url: '', error: `Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}` };
+    return { url: '', error: 'Failed to upload image. Please try again.' };
   }
 };
 
@@ -114,55 +114,29 @@ export const submitPetReport = async (data: PetReportData): Promise<{ data?: Pet
     console.log('Starting pet report submission...');
     console.log('Report data:', data);
     
-    // Validate required fields
-    if (!data.description || !data.location || !data.contact_info || !data.photo_url) {
-      console.error('Missing required fields:', {
-        description: !!data.description,
-        location: !!data.location,
-        contact_info: !!data.contact_info,
-        photo_url: !!data.photo_url
-      });
-      return { error: 'Please fill in all required fields including photo, description, location, and contact information.' };
-    }
+    const { data: user } = await supabase.auth.getUser();
     
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
-    if (userError || !user) {
-      console.error('User not authenticated:', userError);
+    if (!user.user) {
+      console.error('User not authenticated');
       return { error: 'You must be logged in to submit a report' };
     }
 
-    console.log('User authenticated for submission:', user.id);
+    console.log('User authenticated for submission:', user.user.id);
 
-    // Prepare report data with proper field mapping
+    // Prepare report data
     const reportData = {
-      user_id: user.id,
+      user_id: user.user.id,
       type: data.type,
-      pet_name: data.pet_name || null, // This can be null for found pets
-      description: data.description.trim(),
+      pet_name: data.pet_name || null,
+      description: data.description,
       photo_url: data.photo_url,
-      location: data.location.trim(),
-      contact_info: data.contact_info.trim(),
-      status: 'active' as const,
-      date_reported: new Date().toISOString()
+      location: data.location,
+      contact_info: data.contact_info,
+      status: 'active' as const
     };
 
     console.log('Submitting to database:', reportData);
 
-    // Test database connection first
-    const { data: testData, error: testError } = await supabase
-      .from('lost_found_pets')
-      .select('count')
-      .limit(1);
-
-    if (testError) {
-      console.error('Database connection test failed:', testError);
-      return { error: 'Database connection failed. Please try again.' };
-    }
-
-    console.log('Database connection test passed');
-
-    // Submit the report
     const { data: report, error } = await supabase
       .from('lost_found_pets')
       .insert([reportData])
@@ -171,12 +145,6 @@ export const submitPetReport = async (data: PetReportData): Promise<{ data?: Pet
 
     if (error) {
       console.error('Database submission error:', error);
-      console.error('Error details:', {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint
-      });
       
       // Provide more specific error messages
       if (error.code === '23505') {
@@ -185,8 +153,6 @@ export const submitPetReport = async (data: PetReportData): Promise<{ data?: Pet
         return { error: 'Missing required information. Please fill in all required fields.' };
       } else if (error.code === '42501') {
         return { error: 'Permission denied. Please make sure you are logged in.' };
-      } else if (error.code === '23503') {
-        return { error: 'Invalid user reference. Please try logging out and back in.' };
       } else {
         return { error: `Database error: ${error.message}` };
       }
@@ -196,7 +162,7 @@ export const submitPetReport = async (data: PetReportData): Promise<{ data?: Pet
     return { data: report };
   } catch (error) {
     console.error('Unexpected submission error:', error);
-    return { error: `An unexpected error occurred: ${error instanceof Error ? error.message : 'Unknown error'}` };
+    return { error: 'An unexpected error occurred. Please try again.' };
   }
 };
 
