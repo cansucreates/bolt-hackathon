@@ -17,7 +17,6 @@ import {
   Eye,
   Star,
   Award,
-  Users,
   TrendingUp,
   Calendar,
   CheckCircle,
@@ -46,7 +45,7 @@ const mockCategories: Category[] = [
     name: 'Pet Health',
     description: 'Medical questions and health concerns',
     icon: <Heart size={20} />,
-    postCount: 1247,
+    postCount: 0,
     color: 'bg-red-100 text-red-700'
   },
   {
@@ -54,7 +53,7 @@ const mockCategories: Category[] = [
     name: 'Behavior & Training',
     description: 'Training tips and behavioral issues',
     icon: <Users size={20} />,
-    postCount: 892,
+    postCount: 0,
     color: 'bg-blue-100 text-blue-700'
   },
   {
@@ -62,7 +61,7 @@ const mockCategories: Category[] = [
     name: 'General Care',
     description: 'Daily care, grooming, and nutrition',
     icon: <Star size={20} />,
-    postCount: 634,
+    postCount: 0,
     color: 'bg-green-100 text-green-700'
   },
   {
@@ -70,7 +69,7 @@ const mockCategories: Category[] = [
     name: 'Emergency Help',
     description: 'Urgent situations and emergency care',
     icon: <AlertTriangle size={20} />,
-    postCount: 156,
+    postCount: 0,
     color: 'bg-orange-100 text-orange-700'
   },
   {
@@ -78,7 +77,7 @@ const mockCategories: Category[] = [
     name: 'Adoption & Rescue',
     description: 'Adoption stories and rescue discussions',
     icon: <Award size={20} />,
-    postCount: 423,
+    postCount: 0,
     color: 'bg-purple-100 text-purple-700'
   },
   {
@@ -86,155 +85,8 @@ const mockCategories: Category[] = [
     name: 'General Discussion',
     description: 'Everything else about pets',
     icon: <MessageCircle size={20} />,
-    postCount: 789,
+    postCount: 0,
     color: 'bg-gray-100 text-gray-700'
-  }
-];
-
-const mockPosts: ForumPost[] = [
-  {
-    id: '1',
-    title: 'My dog suddenly stopped eating - should I be worried?',
-    content: 'My 3-year-old Golden Retriever hasn\'t eaten anything for the past 24 hours. She\'s usually very food motivated. She\'s drinking water and seems alert, but I\'m getting concerned...\n\nShe\'s up to date on all her vaccinations and hasn\'t had any health issues before. Her energy levels seem normal, and she\'s still excited about walks, but she just sniffs her food and walks away.\n\nI\'ve tried changing her food, adding some chicken broth, and even offering her favorite treats, but she\'s not interested in any of it.\n\nHas anyone experienced something similar? At what point should I take her to the vet? Any advice would be greatly appreciated!',
-    author: {
-      id: 'user1',
-      name: 'Sarah_PetLover',
-      avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
-      reputation: 245,
-      badge: 'Trusted Member'
-    },
-    category: 'health',
-    tags: ['dog', 'eating', 'health', 'golden-retriever'],
-    replies: 12,
-    views: 89,
-    upvotes: 8,
-    downvotes: 0,
-    createdAt: '2025-01-20T10:30:00Z',
-    lastActivity: '2025-01-20T14:22:00Z',
-    isPinned: false,
-    isSolved: false,
-    isFollowing: true,
-    hasImages: false
-  },
-  {
-    id: '2',
-    title: 'Best training methods for aggressive rescue dogs?',
-    content: 'I recently adopted a 2-year-old pit bull mix from a shelter. He shows some aggressive tendencies towards other dogs. Looking for positive training methods that have worked for others...\n\nHe\'s generally very sweet with humans and loves to cuddle, but as soon as he sees another dog, he starts lunging and barking. I\'ve tried using treats to distract him, but it doesn\'t always work.\n\nI\'ve contacted a few trainers in my area, but they\'re quite expensive, and I\'m hoping to get some advice from the community before investing in professional training.\n\nHas anyone successfully rehabilitated a dog-aggressive rescue? What methods worked for you? Any recommended resources or books on the subject?\n\nI really want to help this sweet boy overcome his fears and live a happy, balanced life.',
-    author: {
-      id: 'user2',
-      name: 'DogTrainer_Mike',
-      avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
-      reputation: 892,
-      badge: 'Expert'
-    },
-    category: 'behavior',
-    tags: ['dog', 'training', 'rescue', 'aggression', 'pit-bull'],
-    replies: 24,
-    views: 156,
-    upvotes: 18,
-    downvotes: 2,
-    createdAt: '2025-01-19T16:45:00Z',
-    lastActivity: '2025-01-20T13:15:00Z',
-    isPinned: true,
-    isSolved: true,
-    isFollowing: false,
-    hasImages: true
-  },
-  {
-    id: '3',
-    title: 'Cat won\'t use litter box after moving to new apartment',
-    content: 'We moved last week and my usually well-behaved cat has been avoiding the litter box. I\'ve tried different locations and even got a new box. Any suggestions?\n\nShe\'s a 4-year-old domestic shorthair who has never had litter box issues before. She\'s been using the same type of litter for years without problems.\n\nSince the move, she\'s been hiding more than usual and has had three accidents - all on soft surfaces like the bed and couch.\n\nI\'ve tried putting the litter box in a quiet, low-traffic area, keeping it extremely clean, and even got a Feliway diffuser to help with stress, but nothing seems to be working.\n\nI\'m worried this might become a permanent behavior if I don\'t address it soon. Has anyone dealt with this issue after moving? What finally worked for your cat?',
-    author: {
-      id: 'user3',
-      name: 'CatMom_Jenny',
-      avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg',
-      reputation: 156,
-      badge: 'Active Member'
-    },
-    category: 'behavior',
-    tags: ['cat', 'litter-box', 'moving', 'behavior'],
-    replies: 7,
-    views: 43,
-    upvotes: 5,
-    downvotes: 0,
-    createdAt: '2025-01-20T08:15:00Z',
-    lastActivity: '2025-01-20T12:30:00Z',
-    isPinned: false,
-    isSolved: false,
-    isFollowing: false,
-    hasImages: false
-  },
-  {
-    id: '4',
-    title: 'Emergency: My puppy ate chocolate - what should I do?',
-    content: 'My 4-month-old puppy just ate a small piece of dark chocolate that fell on the floor. I\'m panicking! Should I take him to the vet immediately or monitor him?\n\nHe\'s a 15-pound mixed breed puppy. The chocolate piece was about the size of a quarter, and it was 70% dark chocolate.\n\nThis happened about 20 minutes ago. So far, he seems normal - playing and acting like his usual self. I\'ve read that chocolate is toxic to dogs, but I\'m not sure how serious this amount is.\n\nI called the emergency vet, and they said to monitor him for symptoms like vomiting, diarrhea, increased heart rate, or unusual behavior, but I\'m still worried.\n\nHas anyone dealt with a similar situation? How quickly do symptoms appear? Should I try to induce vomiting at home?',
-    author: {
-      id: 'user4',
-      name: 'NewPuppyParent',
-      avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg',
-      reputation: 23,
-      badge: 'New Member'
-    },
-    category: 'emergency',
-    tags: ['puppy', 'chocolate', 'emergency', 'poison'],
-    replies: 15,
-    views: 78,
-    upvotes: 12,
-    downvotes: 0,
-    createdAt: '2025-01-20T11:45:00Z',
-    lastActivity: '2025-01-20T14:10:00Z',
-    isPinned: false,
-    isSolved: true,
-    isFollowing: true,
-    hasImages: false
-  },
-  {
-    id: '5',
-    title: 'Best diet for senior cats with kidney issues?',
-    content: 'My 14-year-old cat was recently diagnosed with early kidney disease. The vet recommended a special diet, but I\'d love to hear from others who have dealt with this...\n\nThe vet prescribed a prescription kidney diet, but my cat doesn\'t seem to like it much. She\'s always been a picky eater, and I\'m worried about her losing weight if she doesn\'t eat enough.\n\nI\'ve been researching alternative foods and supplements that might help support kidney function while still being palatable. Has anyone found a good balance between kidney-friendly and tasty?\n\nAlso, any tips for getting a picky cat to eat prescription food? I\'ve tried mixing it with her old food and gradually transitioning, but she\'s smart enough to eat around the new kibble.\n\nI want to do everything I can to keep her comfortable and extend her life as much as possible. Any advice from those who\'ve been through this would be so helpful.',
-    author: {
-      id: 'user5',
-      name: 'SeniorCatCare',
-      avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg',
-      reputation: 445,
-      badge: 'Trusted Member'
-    },
-    category: 'health',
-    tags: ['cat', 'senior', 'kidney', 'diet', 'nutrition'],
-    replies: 9,
-    views: 67,
-    upvotes: 11,
-    downvotes: 1,
-    createdAt: '2025-01-19T14:20:00Z',
-    lastActivity: '2025-01-20T09:45:00Z',
-    isPinned: false,
-    isSolved: false,
-    isFollowing: false,
-    hasImages: false
-  },
-  {
-    id: '6',
-    title: 'Success story: From fearful rescue to therapy dog!',
-    content: 'I wanted to share an amazing transformation story. Two years ago, I adopted a severely traumatized rescue dog. Today, she passed her therapy dog certification! Here\'s our journey...\n\nWhen I first met Luna, she was cowering in the back of her kennel at the shelter. She had been found as a stray and showed signs of abuse - she was terrified of men, loud noises, and sudden movements. The shelter staff warned me that she might never be a "normal" dog due to her trauma.\n\nBut there was something special about her eyes - a gentleness that I couldn\'t ignore. I took her home, knowing it would be a challenge.\n\nThe first few months were tough. She hid under furniture, had accidents in the house, and would tremble uncontrollably during thunderstorms. We started with basic trust-building exercises and very gentle positive reinforcement training.\n\nSlowly, she began to come out of her shell. We worked with a behaviorist who specialized in trauma, and Luna started to make friends at the dog park. Her confidence grew with each small success.\n\nFast forward to today - Luna passed her therapy dog certification with flying colors! The evaluator couldn\'t believe she was the same dog I had described from two years ago. She now visits nursing homes and children\'s hospitals, bringing joy to everyone she meets.\n\nI\'m sharing this because I want to encourage anyone who has adopted a traumatized pet. Progress might be slow, and there will be setbacks, but with patience, love, and proper training techniques, these animals can transform in ways you never imagined.\n\nHere are some photos of Luna on her journey from scared shelter dog to certified therapy dog!',
-    author: {
-      id: 'user6',
-      name: 'TherapyDogMom',
-      avatar: 'https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg',
-      reputation: 678,
-      badge: 'Expert'
-    },
-    category: 'adoption',
-    tags: ['rescue', 'therapy-dog', 'success-story', 'training'],
-    replies: 31,
-    views: 234,
-    upvotes: 45,
-    downvotes: 0,
-    createdAt: '2025-01-18T20:30:00Z',
-    lastActivity: '2025-01-20T13:50:00Z',
-    isPinned: true,
-    isSolved: false,
-    isFollowing: true,
-    hasImages: true
   }
 ];
 
@@ -242,8 +94,8 @@ type SortOption = 'newest' | 'popular' | 'unanswered' | 'trending';
 
 const CommunityPage: React.FC = () => {
   const { user } = useAuth();
-  const [posts, setPosts] = useState<ForumPost[]>(mockPosts);
-  const [filteredPosts, setFilteredPosts] = useState<ForumPost[]>(mockPosts);
+  const [posts, setPosts] = useState<ForumPost[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<ForumPost[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
@@ -542,192 +394,17 @@ const CommunityPage: React.FC = () => {
 
           {/* Forum Posts */}
           <div className="space-y-4">
-            {filteredPosts.length === 0 ? (
-              <div className="text-center py-12 md:py-16">
-                <div className="text-4xl md:text-6xl mb-4">🔍</div>
-                <h3 className="text-xl md:text-2xl font-bold text-gray-700 mb-2">No discussions found</h3>
-                <p className="text-gray-600 font-quicksand px-4">
-                  Try adjusting your search or filters, or be the first to start a discussion!
-                </p>
+            <div className="text-center py-12 md:py-16">
+              <div className="text-4xl md:text-6xl mb-4">🔍</div>
+              <h3 className="text-xl md:text-2xl font-bold text-gray-700 mb-2">No discussions found</h3>
+              <p className="text-gray-600 font-quicksand px-4">
+                Be the first to start a discussion! Click the "Ask Question" button to create a new post.
+              </p>
+              <div className="mt-8">
+                <PostCreationButton onClick={() => setShowCreatePostModal(true)} />
               </div>
-            ) : (
-              filteredPosts.map((post) => (
-                <div 
-                  key={post.id} 
-                  className={`bg-white/90 backdrop-blur-sm rounded-kawaii shadow-kawaii border-2 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] p-4 md:p-6 cursor-pointer ${
-                    post.isPinned ? 'border-kawaii-yellow bg-kawaii-yellow/10' : 'border-kawaii-purple/30'
-                  }`}
-                  onClick={() => setSelectedPost(post)}
-                >
-                  <div className="flex items-start gap-3 md:gap-4">
-                    
-                    {/* Vote Section - Fixed centering */}
-                    <div className="flex flex-col items-center gap-1 min-w-[50px] md:min-w-[60px]">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleVote(post.id, 'up');
-                        }}
-                        disabled={!user}
-                        className={`w-8 h-8 md:w-10 md:h-10 rounded-kawaii transition-all duration-200 flex items-center justify-center ${
-                          userVotes[post.id] === 'up'
-                            ? 'bg-kawaii-green text-green-700'
-                            : 'bg-gray-100 hover:bg-kawaii-green/30 text-gray-600'
-                        }`}
-                      >
-                        <ChevronUp size={16} className="md:w-5 md:h-5" />
-                      </button>
-                      
-                      <span className="font-bold text-base md:text-lg text-gray-800">
-                        {post.upvotes - post.downvotes}
-                      </span>
-                      
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleVote(post.id, 'down');
-                        }}
-                        disabled={!user}
-                        className={`w-8 h-8 md:w-10 md:h-10 rounded-kawaii transition-all duration-200 flex items-center justify-center ${
-                          userVotes[post.id] === 'down'
-                            ? 'bg-kawaii-coral text-red-700'
-                            : 'bg-gray-100 hover:bg-kawaii-coral/30 text-gray-600'
-                        }`}
-                      >
-                        <ChevronDown size={16} className="md:w-5 md:h-5" />
-                      </button>
-                    </div>
-
-                    {/* Main Content */}
-                    <div className="flex-1 min-w-0">
-                      
-                      {/* Header */}
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            {post.isPinned && (
-                              <Pin size={14} className="text-kawaii-yellow-dark flex-shrink-0" />
-                            )}
-                            {post.isSolved && (
-                              <CheckCircle size={14} className="text-green-600 flex-shrink-0" />
-                            )}
-                            <h2 className="text-lg md:text-xl font-bold text-gray-800 hover:text-kawaii-purple-dark transition-colors duration-200 leading-tight">
-                              {post.title}
-                            </h2>
-                          </div>
-                          
-                          {/* Tags */}
-                          <div className="flex flex-wrap gap-1 mb-3">
-                            {post.tags.slice(0, 3).map(tag => (
-                              <span 
-                                key={tag}
-                                className="px-2 py-1 bg-kawaii-purple/20 text-kawaii-purple-dark text-xs font-semibold rounded-kawaii cursor-pointer hover:bg-kawaii-purple/30 transition-colors duration-200"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSearchQuery(tag);
-                                }}
-                              >
-                                #{tag}
-                              </span>
-                            ))}
-                            {post.tags.length > 3 && (
-                              <span className="px-2 py-1 text-xs text-gray-500">
-                                +{post.tags.length - 3}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Action Buttons - Fixed centering */}
-                        <div className="flex gap-1 md:gap-2 ml-2 md:ml-4 flex-shrink-0">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleFollow(post.id);
-                            }}
-                            className={`w-8 h-8 md:w-10 md:h-10 rounded-kawaii transition-all duration-200 flex items-center justify-center ${
-                              post.isFollowing
-                                ? 'bg-kawaii-blue text-blue-700'
-                                : 'bg-gray-100 hover:bg-kawaii-blue/30 text-gray-600'
-                            }`}
-                            title={post.isFollowing ? 'Unfollow' : 'Follow'}
-                          >
-                            <Bell size={14} className="md:w-4 md:h-4" />
-                          </button>
-                          
-                          <button 
-                            className="w-8 h-8 md:w-10 md:h-10 bg-gray-100 hover:bg-gray-200 rounded-kawaii transition-colors duration-200 text-gray-600 flex items-center justify-center" 
-                            title="Report"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Flag size={14} className="md:w-4 md:h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Content Preview */}
-                      <p className="text-gray-700 font-quicksand leading-relaxed mb-4 line-clamp-3 text-sm md:text-base">
-                        {post.content}
-                      </p>
-
-                      {/* Author and Stats */}
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <img 
-                            src={post.author.avatar} 
-                            alt={post.author.name}
-                            className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover flex-shrink-0"
-                          />
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-bold text-gray-800 text-sm md:text-base truncate">{post.author.name}</span>
-                              {post.author.badge && (
-                                <span className={`px-2 py-1 text-xs font-bold rounded-kawaii ${getBadgeColor(post.author.badge)} flex-shrink-0`}>
-                                  {post.author.badge}
-                                </span>
-                              )}
-                              <span className="text-xs md:text-sm text-gray-500 flex-shrink-0">• {post.author.reputation} rep</span>
-                            </div>
-                            <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm text-gray-500 flex-wrap">
-                              <span>Posted {formatTimeAgo(post.createdAt)}</span>
-                              <span className="hidden sm:inline">Last active {formatTimeAgo(post.lastActivity)}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Stats */}
-                        <div className="flex items-center gap-3 md:gap-4 text-xs md:text-sm text-gray-600 flex-shrink-0">
-                          <div className="flex items-center gap-1">
-                            <MessageCircle size={14} className="md:w-4 md:h-4" />
-                            <span className="font-semibold">{post.replies}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Eye size={14} className="md:w-4 md:h-4" />
-                            <span className="font-semibold">{post.views}</span>
-                          </div>
-                          {post.hasImages && (
-                            <div className="flex items-center gap-1">
-                              <Tag size={14} className="md:w-4 md:h-4" />
-                              <span className="text-xs">Images</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Load More Button */}
-          {filteredPosts.length > 0 && (
-            <div className="text-center mt-8">
-              <button className="bg-kawaii-purple hover:bg-kawaii-purple-dark text-gray-700 font-bold py-3 px-6 md:px-8 rounded-kawaii transition-all duration-300 hover:scale-105 w-full sm:w-auto">
-                Load More Discussions
-              </button>
             </div>
-          )}
+          </div>
 
           {/* Community Stats */}
           <div className="mt-12 md:mt-16 bg-white/80 backdrop-blur-sm rounded-kawaii shadow-kawaii border-2 border-kawaii-purple/30 p-6 md:p-8">
@@ -737,28 +414,28 @@ const CommunityPage: React.FC = () => {
                 <div className="w-12 h-12 md:w-16 md:h-16 bg-kawaii-purple/20 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Users size={20} className="text-kawaii-purple-dark md:w-6 md:h-6" />
                 </div>
-                <div className="text-xl md:text-2xl font-bold text-gray-800">12,847</div>
+                <div className="text-xl md:text-2xl font-bold text-gray-800">0</div>
                 <div className="text-xs md:text-sm text-gray-600">Active Members</div>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 md:w-16 md:h-16 bg-kawaii-blue/20 rounded-full flex items-center justify-center mx-auto mb-3">
                   <MessageCircle size={20} className="text-kawaii-blue-dark md:w-6 md:h-6" />
                 </div>
-                <div className="text-xl md:text-2xl font-bold text-gray-800">4,156</div>
+                <div className="text-xl md:text-2xl font-bold text-gray-800">0</div>
                 <div className="text-xs md:text-sm text-gray-600">Total Discussions</div>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 md:w-16 md:h-16 bg-kawaii-green/20 rounded-full flex items-center justify-center mx-auto mb-3">
                   <CheckCircle size={20} className="text-kawaii-green-dark md:w-6 md:h-6" />
                 </div>
-                <div className="text-xl md:text-2xl font-bold text-gray-800">3,892</div>
+                <div className="text-xl md:text-2xl font-bold text-gray-800">0</div>
                 <div className="text-xs md:text-sm text-gray-600">Solved Questions</div>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 md:w-16 md:h-16 bg-kawaii-yellow/20 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Home size={20} className="text-kawaii-yellow-dark md:w-6 md:h-6" />
                 </div>
-                <div className="text-xl md:text-2xl font-bold text-gray-800">2,341</div>
+                <div className="text-xl md:text-2xl font-bold text-gray-800">0</div>
                 <div className="text-xs md:text-sm text-gray-600">Paws Sent Home</div>
               </div>
             </div>
