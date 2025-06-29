@@ -143,8 +143,8 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
     <div className="max-w-6xl mx-auto px-4 mb-12">
       <div className="bg-white/80 backdrop-blur-md rounded-kawaii shadow-kawaii border-2 border-kawaii-pink/30 overflow-hidden">
         
-        {/* Map Header - Positioned with lower z-index */}
-        <div className="p-4 bg-kawaii-blue/20 border-b border-kawaii-blue/30 relative" style={{ zIndex: 5 }}>
+        {/* Map Header */}
+        <div className="p-4 bg-kawaii-blue/20 border-b border-kawaii-blue/30 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MapPin size={20} className="text-kawaii-blue-dark" />
@@ -156,12 +156,11 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
           </div>
         </div>
 
-        {/* Map Container - Higher z-index for pins and tooltips */}
+        {/* Map Container */}
         <div 
           className="relative h-96 md:h-[400px] bg-gradient-to-br from-kawaii-green/10 via-kawaii-blue/10 to-kawaii-purple/10 overflow-hidden"
           role="img"
           aria-label={`Interactive map showing ${pets.length} pet locations`}
-          style={{ zIndex: 1 }}
         >
           
           {/* Map Background Pattern */}
@@ -176,109 +175,99 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
             </svg>
           </div>
 
-          {/* Map Pins - Higher z-index */}
-          <div className="relative" style={{ zIndex: 50 }}>
-            {mapPins.map((pin) => {
-              const x = ((pin.lng + 180) / 360) * 100; // Convert lng to percentage
-              const y = ((90 - pin.lat) / 180) * 100; // Convert lat to percentage (inverted)
-              
-              return (
-                <div
-                  key={pin.id}
-                  className="absolute transform -translate-x-1/2 -translate-y-full cursor-pointer transition-all duration-300 hover:scale-110"
-                  style={{ 
-                    left: `${Math.max(5, Math.min(95, x))}%`, 
-                    top: `${Math.max(5, Math.min(95, y))}%`,
-                    zIndex: hoveredPin === pin.id ? 1000 : 50
-                  }}
-                  onClick={() => handlePinClick(pin)}
-                  onMouseEnter={() => setHoveredPin(pin.id)}
-                  onMouseLeave={() => setHoveredPin(null)}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`${pin.pet.status} pet: ${pin.pet.name || 'Unknown'} in ${pin.pet.location}`}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handlePinClick(pin);
-                    }
-                  }}
-                >
-                  {/* Pin Shadow */}
-                  <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-4 h-2 bg-black/20 rounded-full blur-sm"></div>
-                  
-                  {/* Pin */}
-                  <div className={`relative w-8 h-10 transition-all duration-300 ${
-                    hoveredPin === pin.id || selectedPin === pin.id ? 'scale-125' : ''
+          {/* Map Pins */}
+          {mapPins.map((pin) => {
+            const x = ((pin.lng + 180) / 360) * 100; // Convert lng to percentage
+            const y = ((90 - pin.lat) / 180) * 100; // Convert lat to percentage (inverted)
+            
+            return (
+              <div
+                key={pin.id}
+                className="absolute transform -translate-x-1/2 -translate-y-full cursor-pointer transition-all duration-300 hover:scale-110 z-30"
+                style={{ 
+                  left: `${Math.max(5, Math.min(95, x))}%`, 
+                  top: `${Math.max(5, Math.min(95, y))}%` 
+                }}
+                onClick={() => handlePinClick(pin)}
+                onMouseEnter={() => setHoveredPin(pin.id)}
+                onMouseLeave={() => setHoveredPin(null)}
+                role="button"
+                tabIndex={0}
+                aria-label={`${pin.pet.status} pet: ${pin.pet.name || 'Unknown'} in ${pin.pet.location}`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handlePinClick(pin);
+                  }
+                }}
+              >
+                {/* Pin Shadow */}
+                <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-4 h-2 bg-black/20 rounded-full blur-sm"></div>
+                
+                {/* Pin */}
+                <div className={`relative w-8 h-10 transition-all duration-300 ${
+                  hoveredPin === pin.id || selectedPin === pin.id ? 'scale-125' : ''
+                }`}>
+                  <div className={`w-full h-full rounded-t-full border-2 border-white shadow-lg flex items-center justify-center ${
+                    pin.pet.status === 'lost' 
+                      ? 'bg-kawaii-coral' 
+                      : 'bg-kawaii-green-dark'
                   }`}>
-                    <div className={`w-full h-full rounded-t-full border-2 border-white shadow-lg flex items-center justify-center ${
-                      pin.pet.status === 'lost' 
-                        ? 'bg-kawaii-coral' 
-                        : 'bg-kawaii-green-dark'
-                    }`}>
-                      {pin.pet.status === 'lost' ? (
-                        <Paw size={16} className="text-gray-700" />
-                      ) : (
-                        <Heart size={16} className="text-gray-700" />
-                      )}
-                    </div>
-                    <div className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-transparent ${
-                      pin.pet.status === 'lost' 
-                        ? 'border-t-kawaii-coral' 
-                        : 'border-t-kawaii-green-dark'
-                    }`}></div>
+                    {pin.pet.status === 'lost' ? (
+                      <Paw size={16} className="text-gray-700" />
+                    ) : (
+                      <Heart size={16} className="text-gray-700" />
+                    )}
                   </div>
+                  <div className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-transparent ${
+                    pin.pet.status === 'lost' 
+                      ? 'border-t-kawaii-coral' 
+                      : 'border-t-kawaii-green-dark'
+                  }`}></div>
+                </div>
 
-                  {/* Hover Tooltip - CRITICAL: Fixed positioning with highest z-index */}
-                  {hoveredPin === pin.id && (
-                    <div 
-                      className="fixed transform -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-kawaii shadow-lg border border-kawaii-pink/30 p-3 min-w-48 animate-slide-in"
-                      style={{ 
-                        zIndex: 9999,
-                        left: `${window.scrollX + (document.documentElement.clientWidth * x / 100)}px`,
-                        top: `${window.scrollY + (document.documentElement.clientHeight * y / 100) - 120}px`,
-                        maxWidth: '250px'
-                      }}
-                    >
-                      <div className="text-center">
-                        <div className="flex items-center justify-center gap-1 mb-1">
-                          {pin.pet.status === 'lost' ? (
-                            <Paw size={14} className="text-kawaii-coral" />
-                          ) : (
-                            <Heart size={14} className="text-kawaii-green-dark" />
-                          )}
-                          <span className={`text-xs font-bold px-2 py-1 rounded-full ${
-                            pin.pet.status === 'lost' 
-                              ? 'bg-kawaii-coral text-gray-700' 
-                              : 'bg-kawaii-green-dark text-gray-700'
-                          }`}>
-                            {pin.pet.status.toUpperCase()}
-                          </span>
-                        </div>
-                        
-                        {pin.pet.name && (
-                          <h4 className="font-bold text-gray-800 text-sm mb-1">{pin.pet.name}</h4>
+                {/* Hover Tooltip - CRITICAL: High z-index to appear above all elements */}
+                {hoveredPin === pin.id && (
+                  <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-kawaii shadow-lg border border-kawaii-pink/30 p-3 min-w-48 animate-slide-in"
+                       style={{ zIndex: 9999 }}>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        {pin.pet.status === 'lost' ? (
+                          <Paw size={14} className="text-kawaii-coral" />
+                        ) : (
+                          <Heart size={14} className="text-kawaii-green-dark" />
                         )}
-                        
-                        <p className="text-xs text-gray-600 mb-2 line-clamp-2">{pin.pet.description}</p>
-                        
-                        <div className="flex items-center justify-center gap-1 text-xs text-gray-500">
-                          <Calendar size={12} />
-                          <span>{formatDate(pin.pet.date)}</span>
-                        </div>
+                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                          pin.pet.status === 'lost' 
+                            ? 'bg-kawaii-coral text-gray-700' 
+                            : 'bg-kawaii-green-dark text-gray-700'
+                        }`}>
+                          {pin.pet.status.toUpperCase()}
+                        </span>
                       </div>
                       
-                      {/* Tooltip Arrow */}
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white/95"></div>
+                      {pin.pet.name && (
+                        <h4 className="font-bold text-gray-800 text-sm mb-1">{pin.pet.name}</h4>
+                      )}
+                      
+                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">{pin.pet.description}</p>
+                      
+                      <div className="flex items-center justify-center gap-1 text-xs text-gray-500">
+                        <Calendar size={12} />
+                        <span>{formatDate(pin.pet.date)}</span>
+                      </div>
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                    
+                    {/* Tooltip Arrow */}
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white/95"></div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
 
-          {/* Legend - Higher z-index but below tooltips */}
-          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-kawaii shadow-lg border border-kawaii-pink/30 p-4" style={{ zIndex: 20 }}>
+          {/* Legend */}
+          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-kawaii shadow-lg border border-kawaii-pink/30 p-4 z-20">
             <h4 className="font-bold text-gray-800 text-sm mb-3 font-quicksand">Map Legend</h4>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -305,14 +294,14 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
           </div>
 
           {/* Map Attribution */}
-          <div className="absolute bottom-2 left-2 text-xs text-gray-500 bg-white/70 px-2 py-1 rounded" style={{ zIndex: 10 }}>
+          <div className="absolute bottom-2 left-2 text-xs text-gray-500 bg-white/70 px-2 py-1 rounded z-10">
             Interactive Pet Map
           </div>
         </div>
 
         {/* Selected Pet Info */}
         {selectedPin && (
-          <div className="p-4 bg-kawaii-yellow/20 border-t border-kawaii-yellow/30 relative" style={{ zIndex: 5 }}>
+          <div className="p-4 bg-kawaii-yellow/20 border-t border-kawaii-yellow/30 relative z-10">
             {(() => {
               const selectedPet = mapPins.find(pin => pin.id === selectedPin)?.pet;
               if (!selectedPet) return null;

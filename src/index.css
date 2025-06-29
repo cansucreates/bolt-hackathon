@@ -304,6 +304,40 @@
   .upload-progress-bar {
     @apply bg-gradient-to-r from-kawaii-blue to-kawaii-blue-dark;
   }
+
+  /* CRITICAL: Map tooltip z-index fixes */
+  .map-tooltip {
+    z-index: 9999 !important;
+    position: relative;
+  }
+
+  /* Ensure tooltips appear above all other elements */
+  .map-pin-tooltip {
+    z-index: 9999 !important;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  /* Override any conflicting z-index values */
+  .map-container {
+    position: relative;
+    z-index: 1;
+  }
+
+  .map-header {
+    position: relative;
+    z-index: 10;
+  }
+
+  .map-pin {
+    position: relative;
+    z-index: 30;
+  }
+
+  .map-pin:hover .map-tooltip {
+    z-index: 9999 !important;
+    display: block;
+  }
 }
 
 .floating-element {
@@ -400,6 +434,13 @@
   .campaign-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+
+  /* Mobile tooltip adjustments */
+  .map-pin-tooltip {
+    min-width: 200px !important;
+    max-width: 280px !important;
+    font-size: 0.875rem;
   }
 }
 
@@ -509,38 +550,35 @@ html, body {
   }
 }
 
-/* CRITICAL: Map tooltip fixes */
-/* Use fixed positioning for tooltips to ensure they're always on top */
-.map-tooltip {
-  position: fixed !important;
+/* CRITICAL: Ensure map tooltips always appear on top */
+.map-tooltip-container {
   z-index: 9999 !important;
-  pointer-events: none;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
-  border: 2px solid rgba(255, 182, 217, 0.5) !important;
+  position: fixed !important;
 }
 
-/* Ensure the map container has proper stacking context */
-.map-container {
+/* Override any potential z-index conflicts */
+.map-pin-container {
   position: relative;
-  isolation: isolate;
+  z-index: 30;
 }
 
-/* Ensure map pins are always above the map but below tooltips */
-.map-pin {
-  z-index: 50 !important;
-  position: relative !important;
+.map-pin-container:hover .map-tooltip {
+  z-index: 9999 !important;
+  position: absolute !important;
 }
 
-/* Ensure the map header stays in place */
-.map-header {
-  position: relative;
-  z-index: 5 !important;
-}
-
-/* Make sure tooltips are visible on all devices */
+/* Ensure tooltips work across all screen sizes */
 @media (max-width: 768px) {
   .map-tooltip {
-    max-width: 200px !important;
-    font-size: 0.75rem !important;
+    z-index: 9999 !important;
+    max-width: 250px !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .map-tooltip {
+    z-index: 9999 !important;
+    min-width: 200px !important;
   }
 }
