@@ -11,7 +11,7 @@ const Header: React.FC = () => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [authMessage, setAuthMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, loading } = useAuth();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -176,7 +176,21 @@ const Header: React.FC = () => {
   };
 
   const handleSignOut = async () => {
-    await signOut();
+    try {
+      console.log('Header: Initiating sign out...');
+      const result = await signOut();
+      if (result.error) {
+        console.error('Sign out error:', result.error);
+        setAuthMessage({ type: 'error', text: result.error.message });
+      } else {
+        console.log('Header: Sign out successful');
+        setAuthMessage({ type: 'success', text: 'Successfully signed out' });
+        setTimeout(() => setAuthMessage(null), 3000);
+      }
+    } catch (error) {
+      console.error('Unexpected sign out error:', error);
+      setAuthMessage({ type: 'error', text: 'Failed to sign out. Please try again.' });
+    }
     closeMenu();
   };
 
@@ -253,6 +267,15 @@ const Header: React.FC = () => {
       }, 150);
     }
   }, [showAuthModal]);
+
+  // Debug logging for auth state
+  useEffect(() => {
+    console.log('Header: Auth state changed', { 
+      user: user ? user.email : 'None', 
+      profile: profile ? profile.user_name : 'None',
+      loading 
+    });
+  }, [user, profile, loading]);
   
   return (
     <>
@@ -306,7 +329,7 @@ const Header: React.FC = () => {
               
               {/* Auth Section */}
               <div className="flex items-center space-x-1 xl:space-x-2 ml-2 xl:ml-4 pl-2 xl:pl-4 border-l border-gray-200">
-                {user ? (
+                {!loading && user ? (
                   <div className="flex items-center space-x-1 xl:space-x-2">
                     <Link to="/profile" onClick={closeMenu}>
                       <div className="flex items-center gap-1 xl:gap-2 px-2 xl:px-3 py-2 hover:bg-kawaii-pink/30 rounded-kawaii transition-colors duration-300">
@@ -331,7 +354,7 @@ const Header: React.FC = () => {
                       Sign Out
                     </button>
                   </div>
-                ) : (
+                ) : !loading ? (
                   <>
                     <button 
                       onClick={() => openAuthModal('signin')}
@@ -348,6 +371,10 @@ const Header: React.FC = () => {
                       Sign Up
                     </button>
                   </>
+                ) : (
+                  <div className="px-4 py-2 text-gray-600 text-sm">
+                    Loading...
+                  </div>
                 )}
               </div>
             </nav>
@@ -430,7 +457,7 @@ const Header: React.FC = () => {
           
           {/* Auth Buttons */}
           <div className="pt-4 sm:pt-6 border-t border-kawaii-pink/30 space-y-3">
-            {user ? (
+            {!loading && user ? (
               <>
                 <Link to="/profile" onClick={handleMobileNavigation}>
                   <div className="w-full py-3 px-4 bg-kawaii-blue/20 border-2 border-kawaii-blue text-kawaii-blue-dark font-bold rounded-kawaii transition-all duration-300 hover:bg-kawaii-blue/30 flex items-center justify-center gap-2 min-h-[48px]">
@@ -456,7 +483,7 @@ const Header: React.FC = () => {
                   Sign Out
                 </button>
               </>
-            ) : (
+            ) : !loading ? (
               <>
                 <button 
                   className="w-full py-3 px-4 border-2 border-kawaii-pink text-kawaii-pink-dark font-bold rounded-kawaii transition-all duration-300 hover:bg-kawaii-pink/20 flex items-center justify-center gap-2 min-h-[48px]" 
@@ -479,6 +506,10 @@ const Header: React.FC = () => {
                   Sign Up
                 </button>
               </>
+            ) : (
+              <div className="w-full py-3 px-4 text-center text-gray-600">
+                Loading...
+              </div>
             )}
           </div>
 
