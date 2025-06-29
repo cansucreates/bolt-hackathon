@@ -183,7 +183,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
             return (
               <div
                 key={pin.id}
-                className="absolute transform -translate-x-1/2 -translate-y-full cursor-pointer transition-all duration-300 hover:scale-110 z-10"
+                className="absolute transform -translate-x-1/2 -translate-y-full cursor-pointer transition-all duration-300 hover:scale-110 z-20"
                 style={{ 
                   left: `${Math.max(5, Math.min(95, x))}%`, 
                   top: `${Math.max(5, Math.min(95, y))}%` 
@@ -226,39 +226,58 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
                   }`}></div>
                 </div>
 
-                {/* Hover Tooltip */}
+                {/* Hover Tooltip - Fixed positioning and z-index */}
                 {hoveredPin === pin.id && (
-                  <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-kawaii shadow-lg border border-kawaii-pink/30 p-3 min-w-48 z-20 animate-slide-in">
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        {pin.pet.status === 'lost' ? (
-                          <Paw size={14} className="text-kawaii-coral" />
-                        ) : (
-                          <Heart size={14} className="text-kawaii-green-dark" />
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50">
+                    <div className="bg-white rounded-kawaii shadow-xl border-2 border-kawaii-pink/30 p-4 min-w-[280px] max-w-[320px] animate-slide-in">
+                      <div className="text-center">
+                        {/* Status Badge */}
+                        <div className="flex items-center justify-center gap-1 mb-3">
+                          {pin.pet.status === 'lost' ? (
+                            <Paw size={16} className="text-kawaii-coral" />
+                          ) : (
+                            <Heart size={16} className="text-kawaii-green-dark" />
+                          )}
+                          <span className={`text-sm font-bold px-3 py-1 rounded-full ${
+                            pin.pet.status === 'lost' 
+                              ? 'bg-kawaii-coral text-gray-700' 
+                              : 'bg-kawaii-green-dark text-gray-700'
+                          }`}>
+                            {pin.pet.status.toUpperCase()}
+                          </span>
+                        </div>
+                        
+                        {/* Pet Name */}
+                        {pin.pet.name && (
+                          <h4 className="font-bold text-gray-800 text-lg mb-2">{pin.pet.name}</h4>
                         )}
-                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${
-                          pin.pet.status === 'lost' 
-                            ? 'bg-kawaii-coral text-gray-700' 
-                            : 'bg-kawaii-green-dark text-gray-700'
-                        }`}>
-                          {pin.pet.status.toUpperCase()}
-                        </span>
+                        
+                        {/* Location */}
+                        <div className="flex items-center justify-center gap-1 mb-2">
+                          <MapPin size={14} className="text-kawaii-blue-dark" />
+                          <span className="text-sm text-gray-600 font-quicksand">{pin.pet.location}</span>
+                        </div>
+                        
+                        {/* Description */}
+                        <p className="text-sm text-gray-700 mb-3 line-clamp-2 font-quicksand leading-relaxed">
+                          {pin.pet.description}
+                        </p>
+                        
+                        {/* Date */}
+                        <div className="flex items-center justify-center gap-1 text-sm text-gray-500">
+                          <Calendar size={14} />
+                          <span className="font-quicksand">{formatDate(pin.pet.date)}</span>
+                        </div>
+                        
+                        {/* Click hint */}
+                        <div className="mt-3 pt-2 border-t border-gray-200">
+                          <p className="text-xs text-gray-500 font-quicksand">Click to view details</p>
+                        </div>
                       </div>
                       
-                      {pin.pet.name && (
-                        <h4 className="font-bold text-gray-800 text-sm mb-1">{pin.pet.name}</h4>
-                      )}
-                      
-                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">{pin.pet.description}</p>
-                      
-                      <div className="flex items-center justify-center gap-1 text-xs text-gray-500">
-                        <Calendar size={12} />
-                        <span>{formatDate(pin.pet.date)}</span>
-                      </div>
+                      {/* Tooltip Arrow */}
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
                     </div>
-                    
-                    {/* Tooltip Arrow */}
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white/95"></div>
                   </div>
                 )}
               </div>
@@ -266,7 +285,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
           })}
 
           {/* Legend */}
-          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-kawaii shadow-lg border border-kawaii-pink/30 p-4 z-20">
+          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-kawaii shadow-lg border border-kawaii-pink/30 p-4 z-10">
             <h4 className="font-bold text-gray-800 text-sm mb-3 font-quicksand">Map Legend</h4>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -287,7 +306,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
             <div className="mt-3 pt-2 border-t border-kawaii-pink/30">
               <div className="flex items-center gap-1 text-xs text-gray-500">
                 <Eye size={12} />
-                <span>Click pins for details</span>
+                <span>Hover for details</span>
               </div>
             </div>
           </div>
