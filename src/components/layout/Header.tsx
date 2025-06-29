@@ -303,6 +303,7 @@ const Header: React.FC = () => {
               <NavItem to="/vets" icon={<Map size={16} />} onClick={closeMenu}>Find Vets</NavItem>
               <NavItem to="/chat" icon={<MessageCircle size={16} />} onClick={closeMenu}>Vet Chat</NavItem>
               <NavItem to="/community" icon={<Users size={16} />} onClick={closeMenu}>Community</NavItem>
+              <NavItem to="/donations" icon={<Heart size={16} />} onClick={closeMenu}>Donations</NavItem>
               
               {/* Auth Section */}
               <div className="flex items-center space-x-1 xl:space-x-2 ml-2 xl:ml-4 pl-2 xl:pl-4 border-l border-gray-200">
@@ -426,6 +427,9 @@ const Header: React.FC = () => {
           </MobileNavItem>
           <MobileNavItem to="/community" icon={<Users size={18} />} onClick={handleMobileNavigation}>
             Community
+          </MobileNavItem>
+          <MobileNavItem to="/donations" icon={<Heart size={18} />} onClick={handleMobileNavigation}>
+            Donations
           </MobileNavItem>
           
           {/* Auth Buttons */}
