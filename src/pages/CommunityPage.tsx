@@ -24,31 +24,9 @@ import {
   AlertTriangle,
   Home
 } from 'lucide-react';
-
-interface ForumPost {
-  id: string;
-  title: string;
-  content: string;
-  author: {
-    id: string;
-    name: string;
-    avatar: string;
-    reputation: number;
-    badge?: string;
-  };
-  category: string;
-  tags: string[];
-  replies: number;
-  views: number;
-  upvotes: number;
-  downvotes: number;
-  createdAt: string;
-  lastActivity: string;
-  isPinned?: boolean;
-  isSolved?: boolean;
-  isFollowing?: boolean;
-  hasImages?: boolean;
-}
+import { ForumPost } from '../types/community';
+import PostView from '../components/community/PostView';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Category {
   id: string;
@@ -114,7 +92,7 @@ const mockPosts: ForumPost[] = [
   {
     id: '1',
     title: 'My dog suddenly stopped eating - should I be worried?',
-    content: 'My 3-year-old Golden Retriever hasn\'t eaten anything for the past 24 hours. She\'s usually very food motivated. She\'s drinking water and seems alert, but I\'m getting concerned...',
+    content: 'My 3-year-old Golden Retriever hasn\'t eaten anything for the past 24 hours. She\'s usually very food motivated. She\'s drinking water and seems alert, but I\'m getting concerned...\n\nShe\'s up to date on all her vaccinations and hasn\'t had any health issues before. Her energy levels seem normal, and she\'s still excited about walks, but she just sniffs her food and walks away.\n\nI\'ve tried changing her food, adding some chicken broth, and even offering her favorite treats, but she\'s not interested in any of it.\n\nHas anyone experienced something similar? At what point should I take her to the vet? Any advice would be greatly appreciated!',
     author: {
       id: 'user1',
       name: 'Sarah_PetLover',
@@ -138,7 +116,7 @@ const mockPosts: ForumPost[] = [
   {
     id: '2',
     title: 'Best training methods for aggressive rescue dogs?',
-    content: 'I recently adopted a 2-year-old pit bull mix from a shelter. He shows some aggressive tendencies towards other dogs. Looking for positive training methods that have worked for others...',
+    content: 'I recently adopted a 2-year-old pit bull mix from a shelter. He shows some aggressive tendencies towards other dogs. Looking for positive training methods that have worked for others...\n\nHe\'s generally very sweet with humans and loves to cuddle, but as soon as he sees another dog, he starts lunging and barking. I\'ve tried using treats to distract him, but it doesn\'t always work.\n\nI\'ve contacted a few trainers in my area, but they\'re quite expensive, and I\'m hoping to get some advice from the community before investing in professional training.\n\nHas anyone successfully rehabilitated a dog-aggressive rescue? What methods worked for you? Any recommended resources or books on the subject?\n\nI really want to help this sweet boy overcome his fears and live a happy, balanced life.',
     author: {
       id: 'user2',
       name: 'DogTrainer_Mike',
@@ -162,7 +140,7 @@ const mockPosts: ForumPost[] = [
   {
     id: '3',
     title: 'Cat won\'t use litter box after moving to new apartment',
-    content: 'We moved last week and my usually well-behaved cat has been avoiding the litter box. I\'ve tried different locations and even got a new box. Any suggestions?',
+    content: 'We moved last week and my usually well-behaved cat has been avoiding the litter box. I\'ve tried different locations and even got a new box. Any suggestions?\n\nShe\'s a 4-year-old domestic shorthair who has never had litter box issues before. She\'s been using the same type of litter for years without problems.\n\nSince the move, she\'s been hiding more than usual and has had three accidents - all on soft surfaces like the bed and couch.\n\nI\'ve tried putting the litter box in a quiet, low-traffic area, keeping it extremely clean, and even got a Feliway diffuser to help with stress, but nothing seems to be working.\n\nI\'m worried this might become a permanent behavior if I don\'t address it soon. Has anyone dealt with this issue after moving? What finally worked for your cat?',
     author: {
       id: 'user3',
       name: 'CatMom_Jenny',
@@ -186,7 +164,7 @@ const mockPosts: ForumPost[] = [
   {
     id: '4',
     title: 'Emergency: My puppy ate chocolate - what should I do?',
-    content: 'My 4-month-old puppy just ate a small piece of dark chocolate that fell on the floor. I\'m panicking! Should I take him to the vet immediately or monitor him?',
+    content: 'My 4-month-old puppy just ate a small piece of dark chocolate that fell on the floor. I\'m panicking! Should I take him to the vet immediately or monitor him?\n\nHe\'s a 15-pound mixed breed puppy. The chocolate piece was about the size of a quarter, and it was 70% dark chocolate.\n\nThis happened about 20 minutes ago. So far, he seems normal - playing and acting like his usual self. I\'ve read that chocolate is toxic to dogs, but I\'m not sure how serious this amount is.\n\nI called the emergency vet, and they said to monitor him for symptoms like vomiting, diarrhea, increased heart rate, or unusual behavior, but I\'m still worried.\n\nHas anyone dealt with a similar situation? How quickly do symptoms appear? Should I try to induce vomiting at home?',
     author: {
       id: 'user4',
       name: 'NewPuppyParent',
@@ -210,7 +188,7 @@ const mockPosts: ForumPost[] = [
   {
     id: '5',
     title: 'Best diet for senior cats with kidney issues?',
-    content: 'My 14-year-old cat was recently diagnosed with early kidney disease. The vet recommended a special diet, but I\'d love to hear from others who have dealt with this...',
+    content: 'My 14-year-old cat was recently diagnosed with early kidney disease. The vet recommended a special diet, but I\'d love to hear from others who have dealt with this...\n\nThe vet prescribed a prescription kidney diet, but my cat doesn\'t seem to like it much. She\'s always been a picky eater, and I\'m worried about her losing weight if she doesn\'t eat enough.\n\nI\'ve been researching alternative foods and supplements that might help support kidney function while still being palatable. Has anyone found a good balance between kidney-friendly and tasty?\n\nAlso, any tips for getting a picky cat to eat prescription food? I\'ve tried mixing it with her old food and gradually transitioning, but she\'s smart enough to eat around the new kibble.\n\nI want to do everything I can to keep her comfortable and extend her life as much as possible. Any advice from those who\'ve been through this would be so helpful.',
     author: {
       id: 'user5',
       name: 'SeniorCatCare',
@@ -234,7 +212,7 @@ const mockPosts: ForumPost[] = [
   {
     id: '6',
     title: 'Success story: From fearful rescue to therapy dog!',
-    content: 'I wanted to share an amazing transformation story. Two years ago, I adopted a severely traumatized rescue dog. Today, she passed her therapy dog certification! Here\'s our journey...',
+    content: 'I wanted to share an amazing transformation story. Two years ago, I adopted a severely traumatized rescue dog. Today, she passed her therapy dog certification! Here\'s our journey...\n\nWhen I first met Luna, she was cowering in the back of her kennel at the shelter. She had been found as a stray and showed signs of abuse - she was terrified of men, loud noises, and sudden movements. The shelter staff warned me that she might never be a "normal" dog due to her trauma.\n\nBut there was something special about her eyes - a gentleness that I couldn\'t ignore. I took her home, knowing it would be a challenge.\n\nThe first few months were tough. She hid under furniture, had accidents in the house, and would tremble uncontrollably during thunderstorms. We started with basic trust-building exercises and very gentle positive reinforcement training.\n\nSlowly, she began to come out of her shell. We worked with a behaviorist who specialized in trauma, and Luna started to make friends at the dog park. Her confidence grew with each small success.\n\nFast forward to today - Luna passed her therapy dog certification with flying colors! The evaluator couldn\'t believe she was the same dog I had described from two years ago. She now visits nursing homes and children\'s hospitals, bringing joy to everyone she meets.\n\nI\'m sharing this because I want to encourage anyone who has adopted a traumatized pet. Progress might be slow, and there will be setbacks, but with patience, love, and proper training techniques, these animals can transform in ways you never imagined.\n\nHere are some photos of Luna on her journey from scared shelter dog to certified therapy dog!',
     author: {
       id: 'user6',
       name: 'TherapyDogMom',
@@ -260,14 +238,15 @@ const mockPosts: ForumPost[] = [
 type SortOption = 'newest' | 'popular' | 'unanswered' | 'trending';
 
 const CommunityPage: React.FC = () => {
+  const { user } = useAuth();
   const [posts, setPosts] = useState<ForumPost[]>(mockPosts);
   const [filteredPosts, setFilteredPosts] = useState<ForumPost[]>(mockPosts);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [showFilters, setShowFilters] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // Mock login state
   const [userVotes, setUserVotes] = useState<{[key: string]: 'up' | 'down' | null}>({});
+  const [selectedPost, setSelectedPost] = useState<ForumPost | null>(null);
 
   // Apply filters and sorting
   useEffect(() => {
@@ -313,7 +292,7 @@ const CommunityPage: React.FC = () => {
   }, [posts, searchQuery, selectedCategory, sortBy]);
 
   const handleVote = (postId: string, voteType: 'up' | 'down') => {
-    if (!isLoggedIn) return;
+    if (!user) return;
 
     const currentVote = userVotes[postId];
     let newVote: 'up' | 'down' | null = voteType;
@@ -346,7 +325,7 @@ const CommunityPage: React.FC = () => {
   };
 
   const handleFollow = (postId: string) => {
-    if (!isLoggedIn) return;
+    if (!user) return;
 
     setPosts(prev => prev.map(post => 
       post.id === postId 
@@ -376,6 +355,11 @@ const CommunityPage: React.FC = () => {
     }
   };
 
+  // If a post is selected, show the post view
+  if (selectedPost) {
+    return <PostView post={selectedPost} onBack={() => setSelectedPost(null)} />;
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background */}
@@ -394,12 +378,12 @@ const CommunityPage: React.FC = () => {
 
       <div className="relative z-10 pt-24 pb-16">
         {/* Header */}
-        <div className="max-w-6xl mx-auto px-4 text-center mb-8 md:mb-12">
-          <div className="mb-6 md:mb-8">
+        <div className="max-w-6xl mx-auto px-4 text-center mb-12">
+          <div className="mb-8">
             <div className="inline-block bouncing-paw">
               <div className="flex items-center gap-2">
-                <MessageCircle size={48} className="text-kawaii-purple-dark md:w-16 md:h-16" />
-                <Home size={32} className="text-kawaii-pink-dark md:w-12 md:h-12" />
+                <MessageCircle size={64} className="text-kawaii-purple-dark md:w-16 md:h-16" />
+                <Home size={48} className="text-kawaii-pink-dark md:w-12 md:h-12" />
               </div>
             </div>
           </div>
@@ -545,20 +529,24 @@ const CommunityPage: React.FC = () => {
                 </p>
               </div>
             ) : (
-              filteredPosts.map(post => (
+              filteredPosts.map((post) => (
                 <div 
                   key={post.id} 
-                  className={`bg-white/90 backdrop-blur-sm rounded-kawaii shadow-kawaii border-2 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] p-4 md:p-6 ${
+                  className={`bg-white/90 backdrop-blur-sm rounded-kawaii shadow-kawaii border-2 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] p-4 md:p-6 cursor-pointer ${
                     post.isPinned ? 'border-kawaii-yellow bg-kawaii-yellow/10' : 'border-kawaii-purple/30'
                   }`}
+                  onClick={() => setSelectedPost(post)}
                 >
                   <div className="flex items-start gap-3 md:gap-4">
                     
                     {/* Vote Section - Fixed centering */}
                     <div className="flex flex-col items-center gap-1 min-w-[50px] md:min-w-[60px]">
                       <button
-                        onClick={() => handleVote(post.id, 'up')}
-                        disabled={!isLoggedIn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleVote(post.id, 'up');
+                        }}
+                        disabled={!user}
                         className={`w-8 h-8 md:w-10 md:h-10 rounded-kawaii transition-all duration-200 flex items-center justify-center ${
                           userVotes[post.id] === 'up'
                             ? 'bg-kawaii-green text-green-700'
@@ -573,8 +561,11 @@ const CommunityPage: React.FC = () => {
                       </span>
                       
                       <button
-                        onClick={() => handleVote(post.id, 'down')}
-                        disabled={!isLoggedIn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleVote(post.id, 'down');
+                        }}
+                        disabled={!user}
                         className={`w-8 h-8 md:w-10 md:h-10 rounded-kawaii transition-all duration-200 flex items-center justify-center ${
                           userVotes[post.id] === 'down'
                             ? 'bg-kawaii-coral text-red-700'
@@ -598,7 +589,7 @@ const CommunityPage: React.FC = () => {
                             {post.isSolved && (
                               <CheckCircle size={14} className="text-green-600 flex-shrink-0" />
                             )}
-                            <h2 className="text-lg md:text-xl font-bold text-gray-800 hover:text-kawaii-purple-dark cursor-pointer transition-colors duration-200 leading-tight">
+                            <h2 className="text-lg md:text-xl font-bold text-gray-800 hover:text-kawaii-purple-dark transition-colors duration-200 leading-tight">
                               {post.title}
                             </h2>
                           </div>
@@ -609,6 +600,10 @@ const CommunityPage: React.FC = () => {
                               <span 
                                 key={tag}
                                 className="px-2 py-1 bg-kawaii-purple/20 text-kawaii-purple-dark text-xs font-semibold rounded-kawaii cursor-pointer hover:bg-kawaii-purple/30 transition-colors duration-200"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSearchQuery(tag);
+                                }}
                               >
                                 #{tag}
                               </span>
@@ -624,7 +619,10 @@ const CommunityPage: React.FC = () => {
                         {/* Action Buttons - Fixed centering */}
                         <div className="flex gap-1 md:gap-2 ml-2 md:ml-4 flex-shrink-0">
                           <button
-                            onClick={() => handleFollow(post.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleFollow(post.id);
+                            }}
                             className={`w-8 h-8 md:w-10 md:h-10 rounded-kawaii transition-all duration-200 flex items-center justify-center ${
                               post.isFollowing
                                 ? 'bg-kawaii-blue text-blue-700'
@@ -638,6 +636,7 @@ const CommunityPage: React.FC = () => {
                           <button 
                             className="w-8 h-8 md:w-10 md:h-10 bg-gray-100 hover:bg-gray-200 rounded-kawaii transition-colors duration-200 text-gray-600 flex items-center justify-center" 
                             title="Report"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             <Flag size={14} className="md:w-4 md:h-4" />
                           </button>
@@ -668,7 +667,7 @@ const CommunityPage: React.FC = () => {
                               <span className="text-xs md:text-sm text-gray-500 flex-shrink-0">• {post.author.reputation} rep</span>
                             </div>
                             <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm text-gray-500 flex-wrap">
-                              <span>Asked {formatTimeAgo(post.createdAt)}</span>
+                              <span>Posted {formatTimeAgo(post.createdAt)}</span>
                               <span className="hidden sm:inline">Last active {formatTimeAgo(post.lastActivity)}</span>
                             </div>
                           </div>
