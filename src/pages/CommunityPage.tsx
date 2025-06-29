@@ -27,6 +27,9 @@ import {
 import { ForumPost } from '../types/community';
 import PostView from '../components/community/PostView';
 import { useAuth } from '../contexts/AuthContext';
+import CreatePostModal from '../components/community/CreatePostModal';
+import PostCreationButton from '../components/community/PostCreationButton';
+import { voteOnPost } from '../lib/communityService';
 
 interface Category {
   id: string;
@@ -247,6 +250,7 @@ const CommunityPage: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [userVotes, setUserVotes] = useState<{[key: string]: 'up' | 'down' | null}>({});
   const [selectedPost, setSelectedPost] = useState<ForumPost | null>(null);
+  const [showCreatePostModal, setShowCreatePostModal] = useState(false);
 
   // Apply filters and sorting
   useEffect(() => {
@@ -291,7 +295,7 @@ const CommunityPage: React.FC = () => {
     setFilteredPosts([...pinnedPosts, ...regularPosts]);
   }, [posts, searchQuery, selectedCategory, sortBy]);
 
-  const handleVote = (postId: string, voteType: 'up' | 'down') => {
+  const handleVote = async (postId: string, voteType: 'up' | 'down') => {
     if (!user) return;
 
     const currentVote = userVotes[postId];
@@ -302,9 +306,10 @@ const CommunityPage: React.FC = () => {
       newVote = null;
     }
 
+    // Update local state first for immediate feedback
     setUserVotes(prev => ({ ...prev, [postId]: newVote }));
 
-    // Update post votes
+    // Update post votes in local state
     setPosts(prev => prev.map(post => {
       if (post.id === postId) {
         let upvotes = post.upvotes;
@@ -322,6 +327,20 @@ const CommunityPage: React.FC = () => {
       }
       return post;
     }));
+
+    // Send vote to server
+    const result = await voteOnPost(postId, voteType);
+    
+    if (!result.success) {
+      // Revert changes if server request fails
+      setUserVotes(prev => ({ ...prev, [postId]: currentVote }));
+      setPosts(prev => prev.map(post => {
+        if (post.id === postId) {
+          return { ...post };
+        }
+        return post;
+      }));
+    }
   };
 
   const handleFollow = (postId: string) => {
@@ -353,6 +372,12 @@ const CommunityPage: React.FC = () => {
       case 'New Member': return 'bg-gray-100 text-gray-700';
       default: return 'bg-gray-100 text-gray-700';
     }
+  };
+
+  const handlePostCreated = () => {
+    // In a real app, this would fetch the latest posts
+    // For now, we'll just close the modal
+    setShowCreatePostModal(false);
   };
 
   // If a post is selected, show the post view
@@ -429,10 +454,7 @@ const CommunityPage: React.FC = () => {
                   Filters
                 </button>
                 
-                <button className="flex-1 sm:flex-none bg-kawaii-purple hover:bg-kawaii-purple-dark text-gray-700 font-bold py-3 px-6 rounded-kawaii transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-md">
-                  <Plus size={18} />
-                  Ask Question
-                </button>
+                <PostCreationButton onClick={() => setShowCreatePostModal(true)} />
               </div>
             </div>
 
@@ -743,6 +765,15 @@ const CommunityPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Create Post Modal */}
+      {showCreatePostModal && (
+        <CreatePostModal 
+          isOpen={showCreatePostModal}
+          onClose={() => setShowCreatePostModal(false)}
+          onPostCreated={handlePostCreated}
+        />
+      )}
     </div>
   );
 };
