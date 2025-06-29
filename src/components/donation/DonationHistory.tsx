@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Heart, RefreshCw, Download, Filter } from 'lucide-react';
-import { getUserOrders } from '../../lib/stripeService.ts';
+import { getUserOrders } from '../../lib/stripeService';
+import { formatCurrency } from '../../lib/donationService';
 
 const DonationHistory: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
@@ -13,9 +14,14 @@ const DonationHistory: React.FC = () => {
 
   const loadOrders = async () => {
     setLoading(true);
-    const data = await getUserOrders();
-    setOrders(data);
-    setLoading(false);
+    try {
+      const data = await getUserOrders();
+      setOrders(data);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filteredOrders = orders.filter(order => {
@@ -40,13 +46,6 @@ const DonationHistory: React.FC = () => {
     });
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount / 100); // Stripe amounts are in cents
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'text-green-600 bg-green-100';
@@ -58,7 +57,7 @@ const DonationHistory: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-white/80 backdrop-blur-sm rounded-kawaii shadow-kawaii border-2 border-kawaii-pink/30 p-6">
+      <div className="bg-white/80 backdrop-blur-md rounded-kawaii shadow-kawaii border-2 border-kawaii-pink/30 p-6">
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-gray-200 rounded w-1/3"></div>
           {Array.from({ length: 3 }).map((_, i) => (
@@ -76,7 +75,7 @@ const DonationHistory: React.FC = () => {
         <div className="bg-white/80 backdrop-blur-sm rounded-kawaii shadow-kawaii border-2 border-kawaii-pink/30 p-6 text-center">
           <Heart size={32} className="text-kawaii-pink-dark mx-auto mb-2" />
           <div className="text-2xl font-bold text-gray-800">
-            {formatCurrency(totalDonated)}
+            {formatCurrency(totalDonated / 100)}
           </div>
           <div className="text-sm text-gray-600">Total Donated</div>
         </div>
@@ -138,7 +137,7 @@ const DonationHistory: React.FC = () => {
                     
                     <div>
                       <div className="font-semibold text-gray-800">
-                        Donation #{order.order_id}
+                        Donation #{order.order_id.substring(0, 8)}
                       </div>
                       <div className="text-sm text-gray-600">
                         {formatDate(order.order_date)}
@@ -148,7 +147,7 @@ const DonationHistory: React.FC = () => {
                   
                   <div className="text-right">
                     <div className="font-bold text-lg text-gray-800">
-                      {formatCurrency(order.amount_total)}
+                      {formatCurrency(order.amount_total / 100)}
                     </div>
                     <div className={`text-xs px-2 py-1 rounded-full ${getStatusColor(order.order_status)}`}>
                       {order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}
