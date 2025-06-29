@@ -21,3 +21,21 @@ export interface AdoptionFilters {
   location: string;
   sort: 'recent' | 'waiting' | 'urgent';
 }
+
+export interface AdoptionApplication {
+  id?: string;
+  pet_id: string;
+  user_id?: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  address: string;
+  reason: string;
+  has_experience: boolean;
+  agrees_to_terms: boolean;
+  status?: 'pending' | 'approved' | 'rejected';
+  created_at?: string;
+  updated_at?: string;
+  pet_name?: string;
+  pet_photo?: string;
+}

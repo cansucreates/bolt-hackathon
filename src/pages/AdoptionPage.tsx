@@ -3,7 +3,11 @@ import AdoptionHeader from '../components/adoption/AdoptionHeader';
 import FilterBar from '../components/adoption/FilterBar';
 import AdoptableGrid from '../components/adoption/AdoptableGrid';
 import CTABanner from '../components/adoption/CTABanner';
+import AdoptionForm from '../components/adoption/AdoptionForm';
+import AdoptionApplications from '../components/adoption/AdoptionApplications';
 import { AdoptableAnimal, AdoptionFilters } from '../types/adoption';
+import { useAuth } from '../contexts/AuthContext';
+import { Heart, User, CheckCircle, AlertTriangle } from 'lucide-react';
 
 // Mock data for demonstration
 const mockAnimals: AdoptableAnimal[] = [
@@ -120,11 +124,11 @@ const mockAnimals: AdoptableAnimal[] = [
     age: 6,
     ageCategory: 'adult',
     photo: 'https://images.pexels.com/photos/1741205/pexels-photo-1741205.jpeg',
-    location: 'Chicago, IL',
+    location: 'Portland, OR',
     story: 'Shadow is a mysterious and elegant black cat who loves to explore and play hide and seek. He\'s independent but also enjoys cuddle sessions with his favorite humans.',
     waitingTime: 90,
-    shelter: 'PAWS Chicago',
-    contactInfo: 'adopt@pawschicago.org',
+    shelter: 'Oregon Humane Society',
+    contactInfo: 'adopt@oregonhumane.org',
     isUrgent: false
   },
   {
@@ -191,9 +195,13 @@ const mockAnimals: AdoptableAnimal[] = [
 ];
 
 const AdoptionPage: React.FC = () => {
+  const { user } = useAuth();
   const [animals, setAnimals] = useState<AdoptableAnimal[]>(mockAnimals);
   const [filteredAnimals, setFilteredAnimals] = useState<AdoptableAnimal[]>(mockAnimals);
   const [loading, setLoading] = useState(false);
+  const [selectedAnimal, setSelectedAnimal] = useState<AdoptableAnimal | null>(null);
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [showApplicationSuccess, setShowApplicationSuccess] = useState(false);
   const [filters, setFilters] = useState<AdoptionFilters>({
     species: 'all',
     ageRange: 'all',
@@ -253,8 +261,18 @@ const AdoptionPage: React.FC = () => {
   };
 
   const handleAdopt = (animal: AdoptableAnimal) => {
-    // In a real app, this would open an adoption form or redirect to the shelter's website
-    alert(`Thank you for your interest in adopting ${animal.name}! In a real application, this would connect you with ${animal.shelter} to start the adoption process.`);
+    setSelectedAnimal(animal);
+    setShowApplicationForm(true);
+  };
+
+  const handleApplicationSuccess = () => {
+    setShowApplicationForm(false);
+    setShowApplicationSuccess(true);
+    
+    // Hide success message after 5 seconds
+    setTimeout(() => {
+      setShowApplicationSuccess(false);
+    }, 5000);
   };
 
   return (
@@ -307,6 +325,34 @@ const AdoptionPage: React.FC = () => {
       <div className="relative z-10">
         <AdoptionHeader />
         
+        {/* Success Message */}
+        {showApplicationSuccess && (
+          <div className="max-w-6xl mx-auto px-4 mb-8">
+            <div className="bg-green-50 border-2 border-green-200 rounded-kawaii p-4 flex items-center gap-3 animate-slide-in">
+              <CheckCircle size={24} className="text-green-600 flex-shrink-0" />
+              <div>
+                <h3 className="font-bold text-green-800">Application Submitted Successfully!</h3>
+                <p className="text-green-700 font-quicksand">
+                  Thanks for applying to adopt {selectedAnimal?.name}! We'll contact you shortly to discuss next steps.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* User's Applications Section */}
+        {user && (
+          <div className="max-w-6xl mx-auto px-4 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <User size={24} className="text-kawaii-pink-dark" />
+                Your Adoption Journey
+              </h2>
+            </div>
+            <AdoptionApplications />
+          </div>
+        )}
+        
         <FilterBar 
           filters={filters}
           onFilterChange={handleFilterChange}
@@ -331,6 +377,15 @@ const AdoptionPage: React.FC = () => {
 
         <CTABanner />
       </div>
+
+      {/* Adoption Application Form Modal */}
+      {showApplicationForm && selectedAnimal && (
+        <AdoptionForm 
+          animal={selectedAnimal}
+          onClose={() => setShowApplicationForm(false)}
+          onSuccess={handleApplicationSuccess}
+        />
+      )}
     </div>
   );
 };
