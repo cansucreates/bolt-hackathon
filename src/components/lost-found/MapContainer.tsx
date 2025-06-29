@@ -143,7 +143,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
     <div className="max-w-6xl mx-auto px-4 mb-12">
       <div className="bg-white/80 backdrop-blur-md rounded-kawaii shadow-kawaii border-2 border-kawaii-pink/30 overflow-hidden">
         
-        {/* Map Header */}
+        {/* Map Header - z-index 10 */}
         <div className="p-4 bg-kawaii-blue/20 border-b border-kawaii-blue/30 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -156,15 +156,15 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
           </div>
         </div>
 
-        {/* Map Container */}
+        {/* Map Container - Position relative for proper stacking context */}
         <div 
           className="relative h-96 md:h-[400px] bg-gradient-to-br from-kawaii-green/10 via-kawaii-blue/10 to-kawaii-purple/10 overflow-hidden"
           role="img"
           aria-label={`Interactive map showing ${pets.length} pet locations`}
         >
           
-          {/* Map Background Pattern */}
-          <div className="absolute inset-0 opacity-20">
+          {/* Map Background Pattern - z-index 5 */}
+          <div className="absolute inset-0 opacity-20 z-5">
             <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -175,7 +175,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
             </svg>
           </div>
 
-          {/* Map Pins */}
+          {/* Map Pins - z-index 30 */}
           {mapPins.map((pin) => {
             const x = ((pin.lng + 180) / 360) * 100; // Convert lng to percentage
             const y = ((90 - pin.lat) / 180) * 100; // Convert lat to percentage (inverted)
@@ -226,7 +226,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
                   }`}></div>
                 </div>
 
-                {/* Hover Tooltip - FIXED Z-INDEX */}
+                {/* Hover Tooltip - z-index 9999 (highest) */}
                 {hoveredPin === pin.id && (
                   <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-kawaii shadow-lg border border-kawaii-pink/30 p-3 min-w-48 z-[9999] animate-slide-in">
                     <div className="text-center">
@@ -265,7 +265,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
             );
           })}
 
-          {/* Legend */}
+          {/* Legend - z-index 20 */}
           <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-kawaii shadow-lg border border-kawaii-pink/30 p-4 z-20">
             <h4 className="font-bold text-gray-800 text-sm mb-3 font-quicksand">Map Legend</h4>
             <div className="space-y-2">
@@ -292,13 +292,13 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
             </div>
           </div>
 
-          {/* Map Attribution */}
+          {/* Map Attribution - z-index 20 */}
           <div className="absolute bottom-2 left-2 text-xs text-gray-500 bg-white/70 px-2 py-1 rounded z-20">
             Interactive Pet Map
           </div>
         </div>
 
-        {/* Selected Pet Info */}
+        {/* Selected Pet Info - z-index 10 */}
         {selectedPin && (
           <div className="p-4 bg-kawaii-yellow/20 border-t border-kawaii-yellow/30 relative z-10">
             {(() => {
