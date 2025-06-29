@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Heart, RefreshCw, Download, Filter } from 'lucide-react';
-import { getUserOrders } from '../lib/stripeService';
+import { getUserOrders } from '../../lib/stripeService.ts';
 
 const DonationHistory: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
