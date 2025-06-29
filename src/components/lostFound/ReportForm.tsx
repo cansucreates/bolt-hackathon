@@ -181,13 +181,13 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
           // Start progress animation
           const progressInterval = setInterval(() => {
             setUploadProgress(prev => {
-              if (prev >= 85) {
+              if (prev >= 90) {
                 clearInterval(progressInterval);
-                return 85;
+                return 90;
               }
-              return prev + 15;
+              return prev + 10;
             });
-          }, 300);
+          }, 200);
 
           // Convert base64 to blob
           const response = await fetch(initialImageData);
@@ -196,16 +196,10 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
           
           console.log('Converted base64 to file:', { name: file.name, size: file.size, type: file.type });
 
-          // Update progress to show we're uploading
-          setUploadProgress(90);
-
           const uploadResult = await uploadPetImage(file);
           
           clearInterval(progressInterval);
           setUploadProgress(100);
-          
-          // Small delay to show 100% completion
-          await new Promise(resolve => setTimeout(resolve, 500));
           setIsUploading(false);
 
           if (uploadResult.error) {

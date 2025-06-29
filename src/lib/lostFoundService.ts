@@ -75,7 +75,7 @@ export const uploadPetImage = async (file: File): Promise<ImageUploadResult> => 
     // Generate unique filename with user folder
     const fileExt = 'jpg';
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    let filePath = `${user.id}/${fileName}`;
+    const filePath = `${user.id}/${fileName}`;
 
     console.log('Uploading to path:', filePath);
 
