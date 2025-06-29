@@ -96,8 +96,11 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
     if (!validateForm()) return;
     
     setIsSubmitting(true);
+    setErrors({});
     
     try {
+      console.log('Creating post with data:', { title, content, category, tags });
+      
       // Process tags
       const processedTags = tags
         .split(',')
@@ -113,8 +116,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
       });
       
       if (result.error) {
+        console.error('Error creating post:', result.error);
         setErrors({ submit: result.error });
       } else {
+        console.log('Post created successfully:', result.data);
         // Success - clear form and close modal
         setTitle('');
         setContent('');
@@ -126,6 +131,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
         onClose();
       }
     } catch (error) {
+      console.error('Unexpected error creating post:', error);
       setErrors({ submit: 'An unexpected error occurred. Please try again.' });
     } finally {
       setIsSubmitting(false);

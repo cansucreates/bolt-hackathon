@@ -6,12 +6,20 @@ import { Comment, CommentFormData, CommentLike } from '../types/community';
  */
 export const fetchComments = async (postId: string): Promise<{ data?: Comment[]; error?: string }> => {
   try {
+    console.log('Fetching comments for post:', postId);
+    
     // First, fetch all comments for the post
     const { data, error } = await supabase
       .from('comments')
       .select(`
-        *,
-        comment_likes(*)
+        id,
+        post_id,
+        parent_id,
+        author_id,
+        author_name,
+        content,
+        created_at,
+        updated_at
       `)
       .eq('post_id', postId)
       .order('created_at', { ascending: true });
@@ -21,30 +29,82 @@ export const fetchComments = async (postId: string): Promise<{ data?: Comment[];
       return { error: 'Failed to load comments' };
     }
 
+    if (!data || data.length === 0) {
+      console.log('No comments found for post:', postId);
+      return { data: [] };
+    }
+
+    console.log(`Found ${data.length} comments for post:`, postId);
+
     // Get current user to check if they liked any comments
     const { data: { user } } = await supabase.auth.getUser();
+    
+    // Get all comment likes in a single query
+    const { data: allLikes, error: likesError } = await supabase
+      .from('comment_likes')
+      .select('*')
+      .in('comment_id', data.map(comment => comment.id));
+      
+    if (likesError) {
+      console.error('Error fetching comment likes:', likesError);
+      // Continue without likes data
+    }
+
+    // Create a map of comment IDs to like counts and user like status
+    const likesMap: Record<string, { count: number, isLiked: boolean }> = {};
+    
+    if (allLikes) {
+      allLikes.forEach(like => {
+        if (!likesMap[like.comment_id]) {
+          likesMap[like.comment_id] = { count: 0, isLiked: false };
+        }
+        
+        likesMap[like.comment_id].count++;
+        
+        if (user && like.user_id === user.id) {
+          likesMap[like.comment_id].isLiked = true;
+        }
+      });
+    }
+
+    // Get all author info in a single query
+    const authorIds = [...new Set(data.map(comment => comment.author_id))];
+    const { data: authors, error: authorsError } = await supabase
+      .from('users')
+      .select('id, user_name, avatar_url')
+      .in('id', authorIds);
+      
+    if (authorsError) {
+      console.error('Error fetching comment authors:', authorsError);
+      // Continue without author data
+    }
+
+    // Create a map of author IDs to author info
+    const authorsMap: Record<string, { name: string, avatar: string }> = {};
+    
+    if (authors) {
+      authors.forEach(author => {
+        authorsMap[author.id] = { 
+          name: author.user_name || 'Anonymous', 
+          avatar: author.avatar_url || null 
+        };
+      });
+    }
 
     // Process comments to include like status and author info
-    const processedComments = await Promise.all(data.map(async (comment) => {
-      // Get author info
-      const { data: authorData } = await supabase
-        .from('users')
-        .select('avatar_url, user_name')
-        .eq('id', comment.author_id)
-        .single();
-
-      // Check if current user liked this comment
-      const isLiked = user ? comment.comment_likes.some((like: any) => like.user_id === user.id) : false;
+    const processedComments: Comment[] = data.map(comment => {
+      const likeInfo = likesMap[comment.id] || { count: 0, isLiked: false };
+      const authorInfo = authorsMap[comment.author_id] || { name: comment.author_name, avatar: null };
       
       return {
         ...comment,
-        like_count: comment.comment_likes.length,
-        isLiked,
-        author_avatar: authorData?.avatar_url || null,
-        // Remove the raw comment_likes array as we've processed it
-        comment_likes: undefined
+        like_count: likeInfo.count,
+        isLiked: likeInfo.isLiked,
+        author_avatar: authorInfo.avatar,
+        author_name: authorInfo.name || comment.author_name,
+        replies: []
       };
-    }));
+    });
 
     // Organize comments into a tree structure (top-level comments and their replies)
     const topLevelComments: Comment[] = [];
@@ -64,6 +124,10 @@ export const fetchComments = async (postId: string): Promise<{ data?: Comment[];
         const parentComment = commentMap.get(comment.parent_id);
         if (parentComment) {
           parentComment.replies = [...(parentComment.replies || []), processedComment];
+        } else {
+          // If parent doesn't exist (shouldn't happen with proper DB constraints),
+          // treat it as a top-level comment
+          topLevelComments.push(processedComment);
         }
       } else {
         // This is a top-level comment
@@ -71,6 +135,7 @@ export const fetchComments = async (postId: string): Promise<{ data?: Comment[];
       }
     });
 
+    console.log(`Processed ${topLevelComments.length} top-level comments with their replies`);
     return { data: topLevelComments };
   } catch (error) {
     console.error('Error in fetchComments:', error);
@@ -83,6 +148,8 @@ export const fetchComments = async (postId: string): Promise<{ data?: Comment[];
  */
 export const addComment = async (commentData: CommentFormData): Promise<{ data?: Comment; error?: string }> => {
   try {
+    console.log('Adding comment:', commentData);
+    
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
@@ -102,6 +169,8 @@ export const addComment = async (commentData: CommentFormData): Promise<{ data?:
       return { error: 'Failed to fetch user profile' };
     }
 
+    const userName = profile?.user_name || user.email?.split('@')[0] || 'Anonymous';
+
     // Create the comment
     const { data, error } = await supabase
       .from('comments')
@@ -109,7 +178,7 @@ export const addComment = async (commentData: CommentFormData): Promise<{ data?:
         post_id: commentData.post_id,
         parent_id: commentData.parent_id || null,
         author_id: user.id,
-        author_name: profile.user_name || user.email,
+        author_name: userName,
         content: commentData.content
       }])
       .select()
@@ -117,9 +186,10 @@ export const addComment = async (commentData: CommentFormData): Promise<{ data?:
 
     if (error) {
       console.error('Error adding comment:', error);
-      return { error: 'Failed to add comment' };
+      return { error: 'Failed to add comment: ' + error.message };
     }
 
+    console.log('Comment added successfully:', data);
     return { data };
   } catch (error) {
     console.error('Error in addComment:', error);
@@ -132,6 +202,8 @@ export const addComment = async (commentData: CommentFormData): Promise<{ data?:
  */
 export const updateComment = async (commentId: string, content: string): Promise<{ data?: Comment; error?: string }> => {
   try {
+    console.log('Updating comment:', commentId);
+    
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
@@ -154,16 +226,17 @@ export const updateComment = async (commentId: string, content: string): Promise
     // Update the comment
     const { data, error } = await supabase
       .from('comments')
-      .update({ content })
+      .update({ content, updated_at: new Date().toISOString() })
       .eq('id', commentId)
       .select()
       .single();
 
     if (error) {
       console.error('Error updating comment:', error);
-      return { error: 'Failed to update comment' };
+      return { error: 'Failed to update comment: ' + error.message };
     }
 
+    console.log('Comment updated successfully:', data);
     return { data };
   } catch (error) {
     console.error('Error in updateComment:', error);
@@ -176,6 +249,8 @@ export const updateComment = async (commentId: string, content: string): Promise
  */
 export const deleteComment = async (commentId: string): Promise<{ success?: boolean; error?: string }> => {
   try {
+    console.log('Deleting comment:', commentId);
+    
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
@@ -203,9 +278,10 @@ export const deleteComment = async (commentId: string): Promise<{ success?: bool
 
     if (error) {
       console.error('Error deleting comment:', error);
-      return { error: 'Failed to delete comment' };
+      return { error: 'Failed to delete comment: ' + error.message };
     }
 
+    console.log('Comment deleted successfully');
     return { success: true };
   } catch (error) {
     console.error('Error in deleteComment:', error);
@@ -218,6 +294,8 @@ export const deleteComment = async (commentId: string): Promise<{ success?: bool
  */
 export const toggleCommentLike = async (commentId: string): Promise<{ success?: boolean; liked?: boolean; error?: string }> => {
   try {
+    console.log('Toggling like for comment:', commentId);
+    
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
@@ -251,6 +329,7 @@ export const toggleCommentLike = async (commentId: string): Promise<{ success?: 
         return { error: 'Failed to unlike comment' };
       }
 
+      console.log('Comment unliked successfully');
       return { success: true, liked: false };
     } else {
       // User hasn't liked the comment yet, so like it
@@ -266,6 +345,7 @@ export const toggleCommentLike = async (commentId: string): Promise<{ success?: 
         return { error: 'Failed to like comment' };
       }
 
+      console.log('Comment liked successfully');
       return { success: true, liked: true };
     }
   } catch (error) {

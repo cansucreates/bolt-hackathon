@@ -53,11 +53,27 @@ const CommentItem: React.FC<CommentItemProps> = ({
   const handleLikeToggle = async () => {
     if (!user) return;
     
-    const result = await toggleCommentLike(comment.id);
-    
-    if (result.success) {
-      setIsLiked(result.liked || false);
-      setLikeCount(prev => result.liked ? prev + 1 : prev - 1);
+    try {
+      console.log('Toggling like for comment:', comment.id);
+      
+      // Optimistic UI update
+      const newIsLiked = !isLiked;
+      setIsLiked(newIsLiked);
+      setLikeCount(prev => newIsLiked ? prev + 1 : prev - 1);
+      
+      const result = await toggleCommentLike(comment.id);
+      
+      if (!result.success) {
+        // Revert optimistic update if failed
+        console.error('Failed to toggle like:', result.error);
+        setIsLiked(!newIsLiked);
+        setLikeCount(prev => !newIsLiked ? prev + 1 : prev - 1);
+      }
+    } catch (err) {
+      console.error('Error toggling like:', err);
+      // Revert optimistic update
+      setIsLiked(!isLiked);
+      setLikeCount(prev => !isLiked ? prev + 1 : prev - 1);
     }
   };
 
@@ -65,12 +81,23 @@ const CommentItem: React.FC<CommentItemProps> = ({
     if (!isAuthor || !editContent.trim()) return;
     
     setIsSubmitting(true);
-    const result = await updateComment(comment.id, editContent);
-    setIsSubmitting(false);
-    
-    if (result.data) {
-      setIsEditing(false);
-      onCommentUpdated();
+    try {
+      console.log('Updating comment:', comment.id);
+      const result = await updateComment(comment.id, editContent);
+      
+      if (result.error) {
+        console.error('Error updating comment:', result.error);
+        alert('Failed to update comment: ' + result.error);
+      } else {
+        console.log('Comment updated successfully');
+        setIsEditing(false);
+        onCommentUpdated();
+      }
+    } catch (err) {
+      console.error('Unexpected error updating comment:', err);
+      alert('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -78,11 +105,23 @@ const CommentItem: React.FC<CommentItemProps> = ({
     if (!isAuthor) return;
     
     setIsSubmitting(true);
-    const result = await deleteComment(comment.id);
-    setIsSubmitting(false);
-    
-    if (result.success) {
-      onCommentUpdated();
+    try {
+      console.log('Deleting comment:', comment.id);
+      const result = await deleteComment(comment.id);
+      
+      if (result.error) {
+        console.error('Error deleting comment:', result.error);
+        alert('Failed to delete comment: ' + result.error);
+      } else {
+        console.log('Comment deleted successfully');
+        onCommentUpdated();
+      }
+    } catch (err) {
+      console.error('Unexpected error deleting comment:', err);
+      alert('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+      setShowDeleteConfirm(false);
     }
   };
 

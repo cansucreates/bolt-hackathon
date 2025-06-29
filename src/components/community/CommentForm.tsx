@@ -41,19 +41,28 @@ const CommentForm: React.FC<CommentFormProps> = ({
     setIsSubmitting(true);
     setError(null);
     
-    const result = await addComment({
-      content: content.trim(),
-      post_id: postId,
-      parent_id: parentId
-    });
-    
-    setIsSubmitting(false);
-    
-    if (result.error) {
-      setError(result.error);
-    } else {
-      setContent('');
-      onSubmitSuccess();
+    try {
+      console.log('Submitting comment:', { content, postId, parentId });
+      
+      const result = await addComment({
+        content: content.trim(),
+        post_id: postId,
+        parent_id: parentId
+      });
+      
+      if (result.error) {
+        console.error('Error submitting comment:', result.error);
+        setError(result.error);
+      } else {
+        console.log('Comment submitted successfully:', result.data);
+        setContent('');
+        onSubmitSuccess();
+      }
+    } catch (err) {
+      console.error('Unexpected error submitting comment:', err);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
