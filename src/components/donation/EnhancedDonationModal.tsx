@@ -17,7 +17,10 @@ import {
 } from 'lucide-react';
 import { Campaign } from '../../types/crowdfunding';
 import { DonationFormData } from '../../types/donation';
-import { processDonation, validateDonationAmount, formatCurrency } from '../../lib/donationService';
+import { formatCurrency } from '../../lib/donationService';
+import { redirectToCheckout } from '../../lib/stripeService';
+import { stripeProducts } from '../../stripe-config';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface EnhancedDonationModalProps {
   campaign: Campaign;
@@ -30,6 +33,7 @@ const EnhancedDonationModal: React.FC<EnhancedDonationModalProps> = ({
   onClose, 
   onSuccess 
 }) => {
+  const { user } = useAuth();
   const [step, setStep] = useState<'amount' | 'details' | 'payment' | 'processing' | 'success'>('amount');
   const [formData, setFormData] = useState<DonationFormData>({
     amount: 25,
@@ -43,7 +47,17 @@ const EnhancedDonationModal: React.FC<EnhancedDonationModalProps> = ({
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const presetAmounts = [10, 25, 50, 100, 250, 500];
+  const presetAmounts = [10, 25, 50, 100, 250];
+
+  useEffect(() => {
+    // Pre-fill email if user is logged in
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        donorEmail: user.email || prev.donorEmail
+      }));
+    }
+  }, [user]);
 
   const handleAmountSelect = (amount: number) => {
     setFormData(prev => ({ ...prev, amount, customAmount: undefined }));
@@ -62,9 +76,10 @@ const EnhancedDonationModal: React.FC<EnhancedDonationModalProps> = ({
     const newErrors: { [key: string]: string } = {};
 
     if (currentStep === 'amount') {
-      const validation = validateDonationAmount(formData.amount);
-      if (!validation.isValid) {
-        newErrors.amount = validation.error || 'Invalid amount';
+      if (formData.amount < 1) {
+        newErrors.amount = 'Minimum donation amount is $1';
+      } else if (formData.amount > 10000) {
+        newErrors.amount = 'Maximum donation amount is $10,000';
       }
     }
 
@@ -82,21 +97,6 @@ const EnhancedDonationModal: React.FC<EnhancedDonationModalProps> = ({
       }
     }
 
-    if (currentStep === 'payment' && formData.paymentMethod === 'card') {
-      if (!formData.cardDetails?.number?.trim()) {
-        newErrors.cardNumber = 'Card number is required';
-      }
-      if (!formData.cardDetails?.expiry?.trim()) {
-        newErrors.cardExpiry = 'Expiry date is required';
-      }
-      if (!formData.cardDetails?.cvc?.trim()) {
-        newErrors.cardCvc = 'CVC is required';
-      }
-      if (!formData.cardDetails?.name?.trim()) {
-        newErrors.cardName = 'Cardholder name is required';
-      }
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -109,9 +109,7 @@ const EnhancedDonationModal: React.FC<EnhancedDonationModalProps> = ({
         setStep('details');
         break;
       case 'details':
-        setStep('payment');
-        break;
-      case 'payment':
+        // Skip payment step and go directly to processing
         handleSubmitDonation();
         break;
     }
@@ -129,24 +127,28 @@ const EnhancedDonationModal: React.FC<EnhancedDonationModalProps> = ({
   };
 
   const handleSubmitDonation = async () => {
-    if (!validateStep('payment')) return;
+    if (!validateStep('details')) return;
 
     setStep('processing');
     setIsProcessing(true);
 
     try {
-      const result = await processDonation(campaign.id, formData);
+      // Use Stripe Checkout for payment processing
+      const result = await redirectToCheckout(
+        stripeProducts.donation.priceId,
+        'payment',
+        `${window.location.origin}/donations?success=true&amount=${formData.amount}&campaign=${campaign.id}`,
+        `${window.location.origin}/donations?canceled=true`
+      );
 
-      if (result.success) {
-        setStep('success');
-        onSuccess(formData.amount, formData.isAnonymous);
-      } else {
+      if (!result.success) {
         setErrors({ payment: result.error || 'Payment failed' });
-        setStep('payment');
+        setStep('details');
       }
+      // Note: We don't set success state here because the user will be redirected to Stripe
     } catch (error) {
       setErrors({ payment: 'An unexpected error occurred' });
-      setStep('payment');
+      setStep('details');
     } finally {
       setIsProcessing(false);
     }
@@ -298,52 +300,6 @@ const EnhancedDonationModal: React.FC<EnhancedDonationModalProps> = ({
                 </div>
               )}
 
-              {/* Recurring Option */}
-              <div className="space-y-3">
-                <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-kawaii hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.isRecurring}
-                    onChange={(e) => setFormData(prev => ({ ...prev, isRecurring: e.target.checked }))}
-                    className="w-4 h-4"
-                  />
-                  <div className="flex items-center gap-2">
-                    <Calendar size={16} className="text-kawaii-blue-dark" />
-                    <span className="text-sm text-gray-700 font-quicksand font-semibold">
-                      Make this a recurring donation
-                    </span>
-                  </div>
-                </label>
-
-                {formData.isRecurring && (
-                  <select
-                    value={formData.recurringFrequency || 'monthly'}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      recurringFrequency: e.target.value as 'monthly' | 'quarterly' | 'yearly'
-                    }))}
-                    className="kawaii-input w-full"
-                  >
-                    <option value="monthly">Monthly</option>
-                    <option value="quarterly">Quarterly</option>
-                    <option value="yearly">Yearly</option>
-                  </select>
-                )}
-              </div>
-            </div>
-          )}
-
-          {step === 'details' && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
-                  Your information
-                </h3>
-                <p className="text-gray-600 font-quicksand">
-                  Help us send you a donation receipt and updates
-                </p>
-              </div>
-
               {/* Anonymous Option */}
               <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-kawaii hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
                 <input
@@ -359,6 +315,19 @@ const EnhancedDonationModal: React.FC<EnhancedDonationModalProps> = ({
                   </span>
                 </div>
               </label>
+            </div>
+          )}
+
+          {step === 'details' && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                  Your information
+                </h3>
+                <p className="text-gray-600 font-quicksand">
+                  Help us send you a donation receipt and updates
+                </p>
+              </div>
 
               {/* Donor Information */}
               <div className="space-y-4">
@@ -406,145 +375,13 @@ const EnhancedDonationModal: React.FC<EnhancedDonationModalProps> = ({
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {step === 'payment' && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
-                  Payment information
-                </h3>
-                <p className="text-gray-600 font-quicksand">
-                  Your payment is secure and encrypted
-                </p>
-              </div>
-
-              {/* Payment Summary */}
-              <div className="p-4 bg-kawaii-blue/20 rounded-kawaii">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-bold text-gray-800">Donation Amount:</span>
-                  <span className="text-xl font-bold text-kawaii-yellow-dark">
-                    {formatCurrency(formData.amount)}
-                  </span>
-                </div>
-                {formData.isRecurring && (
-                  <p className="text-sm text-gray-600">
-                    Recurring {formData.recurringFrequency}
-                  </p>
-                )}
-              </div>
-
-              {/* Payment Method Selection */}
-              <div className="space-y-3">
-                <h4 className="font-bold text-gray-800">Payment Method</h4>
-                <div className="space-y-3">
-                  <label className={`flex items-center gap-3 p-4 border-2 rounded-kawaii cursor-pointer transition-all duration-300 ${
-                    formData.paymentMethod === 'card' ? 'border-kawaii-yellow bg-kawaii-yellow/20' : 'border-gray-200 hover:bg-gray-50'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="card"
-                      checked={formData.paymentMethod === 'card'}
-                      onChange={(e) => setFormData(prev => ({ ...prev, paymentMethod: e.target.value as 'card' }))}
-                      className="w-4 h-4"
-                    />
-                    <CreditCard size={20} className="text-gray-600" />
-                    <span className="font-semibold text-gray-700">Credit/Debit Card</span>
-                  </label>
-                  
-                  <label className={`flex items-center gap-3 p-4 border-2 rounded-kawaii cursor-pointer transition-all duration-300 ${
-                    formData.paymentMethod === 'paypal' ? 'border-kawaii-yellow bg-kawaii-yellow/20' : 'border-gray-200 hover:bg-gray-50'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="paypal"
-                      checked={formData.paymentMethod === 'paypal'}
-                      onChange={(e) => setFormData(prev => ({ ...prev, paymentMethod: e.target.value as 'paypal' }))}
-                      className="w-4 h-4"
-                    />
-                    <div className="w-5 h-5 bg-blue-600 rounded flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">P</span>
-                    </div>
-                    <span className="font-semibold text-gray-700">PayPal</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Card Details */}
-              {formData.paymentMethod === 'card' && (
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder="Card Number"
-                    value={formData.cardDetails?.number || ''}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      cardDetails: { ...prev.cardDetails, number: e.target.value } as any
-                    }))}
-                    className={`kawaii-input w-full ${errors.cardNumber ? 'border-red-300' : ''}`}
-                  />
-                  {errors.cardNumber && (
-                    <p className="text-red-600 text-xs">{errors.cardNumber}</p>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <input
-                        type="text"
-                        placeholder="MM/YY"
-                        value={formData.cardDetails?.expiry || ''}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          cardDetails: { ...prev.cardDetails, expiry: e.target.value } as any
-                        }))}
-                        className={`kawaii-input ${errors.cardExpiry ? 'border-red-300' : ''}`}
-                      />
-                      {errors.cardExpiry && (
-                        <p className="text-red-600 text-xs mt-1">{errors.cardExpiry}</p>
-                      )}
-                    </div>
-                    <div>
-                      <input
-                        type="text"
-                        placeholder="CVC"
-                        value={formData.cardDetails?.cvc || ''}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          cardDetails: { ...prev.cardDetails, cvc: e.target.value } as any
-                        }))}
-                        className={`kawaii-input ${errors.cardCvc ? 'border-red-300' : ''}`}
-                      />
-                      {errors.cardCvc && (
-                        <p className="text-red-600 text-xs mt-1">{errors.cardCvc}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <input
-                    type="text"
-                    placeholder="Cardholder Name"
-                    value={formData.cardDetails?.name || ''}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      cardDetails: { ...prev.cardDetails, name: e.target.value } as any
-                    }))}
-                    className={`kawaii-input w-full ${errors.cardName ? 'border-red-300' : ''}`}
-                  />
-                  {errors.cardName && (
-                    <p className="text-red-600 text-xs">{errors.cardName}</p>
-                  )}
-                </div>
-              )}
 
               {/* Security Notice */}
               <div className="p-3 bg-green-50 border border-green-200 rounded-kawaii">
                 <div className="flex items-center gap-2">
                   <Shield size={16} className="text-green-600" />
                   <span className="text-sm text-green-800 font-quicksand">
-                    Your payment is secure and encrypted with 256-bit SSL
+                    Your payment will be securely processed by Stripe
                   </span>
                 </div>
               </div>
@@ -596,11 +433,6 @@ const EnhancedDonationModal: React.FC<EnhancedDonationModalProps> = ({
                 <p className="text-sm text-gray-600 font-quicksand">
                   A confirmation email has been sent to {formData.donorEmail}
                 </p>
-                {formData.isRecurring && (
-                  <p className="text-sm text-gray-600 font-quicksand">
-                    Your {formData.recurringFrequency} donation will help provide ongoing support.
-                  </p>
-                )}
               </div>
             </div>
           )}
@@ -621,7 +453,7 @@ const EnhancedDonationModal: React.FC<EnhancedDonationModalProps> = ({
                 disabled={isProcessing}
                 className="flex-1 py-3 px-4 bg-kawaii-yellow hover:bg-kawaii-yellow-dark disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 font-bold rounded-kawaii transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-md"
               >
-                {step === 'payment' ? (
+                {step === 'details' ? (
                   <>
                     <Gift size={18} />
                     Donate {formatCurrency(formData.amount)}

@@ -1,12 +1,59 @@
-import React, { useState } from 'react';
-import { Heart, TrendingUp, Users, Calendar, Home } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Heart, TrendingUp, Users, Calendar, Home, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import DonationHistory from '../components/donation/DonationHistory';
 import DonationStats from '../components/donation/DonationStats';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { getUserOrders } from '../lib/stripeService';
 
 const DonationPage: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'stats'>('overview');
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Check for success or canceled query parameters
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const success = params.get('success');
+    const canceled = params.get('canceled');
+    const amount = params.get('amount');
+    const campaign = params.get('campaign');
+
+    if (success === 'true') {
+      setMessage({ 
+        type: 'success', 
+        text: `Thank you for your donation${amount ? ` of $${amount}` : ''}! Your support helps animals in need.` 
+      });
+      // Clean up URL
+      navigate('/donations', { replace: true });
+    } else if (canceled === 'true') {
+      setMessage({ 
+        type: 'error', 
+        text: 'Your donation was canceled. Please try again if you'd like to support our cause.' 
+      });
+      // Clean up URL
+      navigate('/donations', { replace: true });
+    }
+  }, [location, navigate]);
+
+  // Load user's orders
+  useEffect(() => {
+    const loadOrders = async () => {
+      if (user) {
+        setLoading(true);
+        const orders = await getUserOrders();
+        setOrders(orders);
+        setLoading(false);
+      }
+    };
+
+    loadOrders();
+  }, [user]);
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -47,6 +94,22 @@ const DonationPage: React.FC = () => {
         </div>
 
         <div className="max-w-6xl mx-auto px-4">
+          {/* Status Message */}
+          {message && (
+            <div className={`mb-8 p-4 rounded-kawaii flex items-center gap-3 ${
+              message.type === 'success' 
+                ? 'bg-green-50 border border-green-200 text-green-800' 
+                : 'bg-red-50 border border-red-200 text-red-800'
+            }`}>
+              {message.type === 'success' ? (
+                <CheckCircle size={24} className="flex-shrink-0" />
+              ) : (
+                <AlertTriangle size={24} className="flex-shrink-0" />
+              )}
+              <p className="font-quicksand">{message.text}</p>
+            </div>
+          )}
+
           {/* Tab Navigation */}
           <div className="flex justify-center mb-8">
             <div className="bg-white/80 backdrop-blur-sm rounded-kawaii shadow-kawaii border-2 border-kawaii-yellow/30 p-2 flex">
@@ -126,7 +189,67 @@ const DonationPage: React.FC = () => {
                 </div>
               </div>
               
-              {user && <DonationHistory />}
+              {user && (
+                <div className="bg-white/90 backdrop-blur-sm rounded-kawaii shadow-kawaii border-2 border-kawaii-pink/30 p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Your Donation Summary</h3>
+                  
+                  {loading ? (
+                    <div className="animate-pulse space-y-4">
+                      <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                      <div className="h-20 bg-gray-200 rounded"></div>
+                    </div>
+                  ) : orders.length > 0 ? (
+                    <div className="space-y-6">
+                      <div className="text-center">
+                        <p className="text-3xl font-bold text-kawaii-yellow-dark">
+                          {orders.length}
+                        </p>
+                        <p className="text-gray-600 font-quicksand">
+                          Total Donations Made
+                        </p>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {orders.slice(0, 3).map((order, index) => (
+                          <div key={index} className="p-4 border border-gray-200 rounded-kawaii">
+                            <div className="flex items-center gap-3 mb-2">
+                              <Heart size={20} className="text-kawaii-pink-dark" />
+                              <div className="text-sm font-semibold text-gray-700">
+                                Donation #{index + 1}
+                              </div>
+                            </div>
+                            <div className="text-lg font-bold text-gray-800 mb-1">
+                              ${(order.amount_total / 100).toFixed(2)}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {new Date(order.order_date).toLocaleDateString()}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <div className="text-center">
+                        <button 
+                          onClick={() => setActiveTab('history')}
+                          className="px-6 py-3 bg-kawaii-yellow hover:bg-kawaii-yellow-dark text-gray-700 font-bold rounded-kawaii transition-all duration-300 hover:scale-105"
+                        >
+                          View Full History
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-600 font-quicksand mb-4">
+                        You haven't made any donations yet. Start making a difference today!
+                      </p>
+                      <a href="/crowdfunding" className="px-6 py-3 bg-kawaii-yellow hover:bg-kawaii-yellow-dark text-gray-700 font-bold rounded-kawaii transition-all duration-300 hover:scale-105 inline-block">
+                        Browse Campaigns
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -145,7 +268,10 @@ const DonationPage: React.FC = () => {
               <p className="text-gray-600 font-quicksand mb-6">
                 Create an account or sign in to track your donations and see the impact you're making.
               </p>
-              <button className="kawaii-button bg-kawaii-pink hover:bg-kawaii-pink-dark text-gray-700 font-bold py-3 px-6">
+              <button 
+                onClick={() => document.querySelector<HTMLButtonElement>('button:has(.LogIn)')?.click()}
+                className="kawaii-button bg-kawaii-pink hover:bg-kawaii-pink-dark text-gray-700 font-bold py-3 px-6"
+              >
                 Sign In
               </button>
             </div>
