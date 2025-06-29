@@ -17,7 +17,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
     type,
     pet_name: '',
     description: '',
-    photo_url: '', // Start with empty photo_url
+    photo_url: initialImageData || '',
     location: '',
     contact_info: ''
   });
@@ -99,8 +99,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
       }
     }
 
-    // Check if we have either a new image file or initial image data
-    if (!imageFile && !initialImageData && !imagePreview) {
+    if (!imageFile && !formData.photo_url) {
       newErrors.image = 'Photo is required';
     }
 
@@ -118,9 +117,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
     console.log('Form submission started');
     console.log('User authenticated:', !!user);
     console.log('Form data:', formData);
-    console.log('Image file:', imageFile);
-    console.log('Initial image data exists:', !!initialImageData);
-    console.log('Image preview exists:', !!imagePreview);
     
     if (!user) {
       setMessage({ type: 'error', text: 'You must be logged in to submit a report' });
@@ -136,9 +132,9 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
     setMessage(null);
 
     try {
-      let photoUrl = '';
+      let photoUrl = formData.photo_url;
 
-      // Handle image upload - prioritize new file over initial data
+      // Upload image if a new file is selected
       if (imageFile) {
         console.log('Uploading new image file...');
         setIsUploading(true);
@@ -170,49 +166,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ type, onSuccess, onCancel, init
 
         photoUrl = uploadResult.url;
         console.log('Image uploaded successfully:', photoUrl);
-      } else if (initialImageData) {
-        console.log('Using initial image data, need to upload it first...');
-        
-        // Convert base64 to blob and upload
-        try {
-          const response = await fetch(initialImageData);
-          const blob = await response.blob();
-          const file = new File([blob], 'transferred-image.jpg', { type: 'image/jpeg' });
-          
-          setIsUploading(true);
-          setUploadProgress(0);
-          
-          const progressInterval = setInterval(() => {
-            setUploadProgress(prev => {
-              if (prev >= 90) {
-                clearInterval(progressInterval);
-                return 90;
-              }
-              return prev + 10;
-            });
-          }, 200);
-
-          const uploadResult = await uploadPetImage(file);
-          
-          clearInterval(progressInterval);
-          setUploadProgress(100);
-          setIsUploading(false);
-
-          if (uploadResult.error) {
-            console.error('Initial image upload failed:', uploadResult.error);
-            setMessage({ type: 'error', text: uploadResult.error });
-            setIsSubmitting(false);
-            return;
-          }
-
-          photoUrl = uploadResult.url;
-          console.log('Initial image uploaded successfully:', photoUrl);
-        } catch (error) {
-          console.error('Error processing initial image:', error);
-          setMessage({ type: 'error', text: 'Failed to process the uploaded image. Please try uploading again.' });
-          setIsSubmitting(false);
-          return;
-        }
       }
 
       // Validate that we have a photo URL
