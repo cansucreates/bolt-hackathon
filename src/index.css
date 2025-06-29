@@ -304,6 +304,40 @@
   .upload-progress-bar {
     @apply bg-gradient-to-r from-kawaii-blue to-kawaii-blue-dark;
   }
+
+  /* CRITICAL: Map tooltip z-index fixes */
+  .map-tooltip {
+    z-index: 9999 !important;
+    position: relative;
+  }
+
+  /* Ensure tooltips appear above all other elements */
+  .map-pin-tooltip {
+    z-index: 9999 !important;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  /* Override any conflicting z-index values */
+  .map-container {
+    position: relative;
+    z-index: 1;
+  }
+
+  .map-header {
+    position: relative;
+    z-index: 10;
+  }
+
+  .map-pin {
+    position: relative;
+    z-index: 30;
+  }
+
+  .map-pin:hover .map-tooltip {
+    z-index: 9999 !important;
+    display: block;
+  }
 }
 
 .floating-element {
@@ -400,6 +434,13 @@
   .campaign-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+
+  /* Mobile tooltip adjustments */
+  .map-pin-tooltip {
+    min-width: 200px !important;
+    max-width: 280px !important;
+    font-size: 0.875rem;
   }
 }
 
@@ -506,5 +547,38 @@ html, body {
   
   .large-desktop-spacing {
     @apply space-x-4;
+  }
+}
+
+/* CRITICAL: Ensure map tooltips always appear on top */
+.map-tooltip-container {
+  z-index: 9999 !important;
+  position: fixed !important;
+}
+
+/* Override any potential z-index conflicts */
+.map-pin-container {
+  position: relative;
+  z-index: 30;
+}
+
+.map-pin-container:hover .map-tooltip {
+  z-index: 9999 !important;
+  position: absolute !important;
+}
+
+/* Ensure tooltips work across all screen sizes */
+@media (max-width: 768px) {
+  .map-tooltip {
+    z-index: 9999 !important;
+    max-width: 250px !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .map-tooltip {
+    z-index: 9999 !important;
+    min-width: 200px !important;
   }
 }

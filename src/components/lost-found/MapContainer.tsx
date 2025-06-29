@@ -144,7 +144,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
       <div className="bg-white/80 backdrop-blur-md rounded-kawaii shadow-kawaii border-2 border-kawaii-pink/30 overflow-hidden">
         
         {/* Map Header */}
-        <div className="p-4 bg-kawaii-blue/20 border-b border-kawaii-blue/30">
+        <div className="p-4 bg-kawaii-blue/20 border-b border-kawaii-blue/30 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MapPin size={20} className="text-kawaii-blue-dark" />
@@ -183,7 +183,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
             return (
               <div
                 key={pin.id}
-                className="absolute transform -translate-x-1/2 -translate-y-full cursor-pointer transition-all duration-300 hover:scale-110 z-10"
+                className="absolute transform -translate-x-1/2 -translate-y-full cursor-pointer transition-all duration-300 hover:scale-110 z-30"
                 style={{ 
                   left: `${Math.max(5, Math.min(95, x))}%`, 
                   top: `${Math.max(5, Math.min(95, y))}%` 
@@ -226,9 +226,10 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
                   }`}></div>
                 </div>
 
-                {/* Hover Tooltip */}
+                {/* Hover Tooltip - CRITICAL: High z-index to appear above all elements */}
                 {hoveredPin === pin.id && (
-                  <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-kawaii shadow-lg border border-kawaii-pink/30 p-3 min-w-48 z-20 animate-slide-in">
+                  <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-kawaii shadow-lg border border-kawaii-pink/30 p-3 min-w-48 animate-slide-in"
+                       style={{ zIndex: 9999 }}>
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
                         {pin.pet.status === 'lost' ? (
@@ -293,14 +294,14 @@ const MapContainer: React.FC<MapContainerProps> = ({ pets, onPetSelect }) => {
           </div>
 
           {/* Map Attribution */}
-          <div className="absolute bottom-2 left-2 text-xs text-gray-500 bg-white/70 px-2 py-1 rounded">
+          <div className="absolute bottom-2 left-2 text-xs text-gray-500 bg-white/70 px-2 py-1 rounded z-10">
             Interactive Pet Map
           </div>
         </div>
 
         {/* Selected Pet Info */}
         {selectedPin && (
-          <div className="p-4 bg-kawaii-yellow/20 border-t border-kawaii-yellow/30">
+          <div className="p-4 bg-kawaii-yellow/20 border-t border-kawaii-yellow/30 relative z-10">
             {(() => {
               const selectedPet = mapPins.find(pin => pin.id === selectedPin)?.pet;
               if (!selectedPet) return null;
