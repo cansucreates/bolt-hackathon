@@ -163,6 +163,15 @@
     animation: slideIn 0.3s ease-out;
   }
 
+  /* Enhanced map hover tooltip animations */
+  .map-tooltip-enter {
+    animation: mapTooltipEnter 0.2s ease-out;
+  }
+
+  .map-tooltip-exit {
+    animation: mapTooltipExit 0.15s ease-in;
+  }
+
   /* Text truncation utility */
   .line-clamp-3 {
     display: -webkit-box;
@@ -213,6 +222,12 @@
     input[type="checkbox"] {
       @apply w-5 h-5 min-w-[20px] min-h-[20px];
     }
+
+    /* Mobile map tooltip adjustments */
+    .map-container .animate-slide-in {
+      min-width: 280px;
+      max-width: calc(100vw - 2rem);
+    }
   }
 
   /* Extra small mobile devices */
@@ -228,12 +243,40 @@
     .kawaii-button {
       @apply py-3 px-4 text-sm;
     }
+
+    /* Extra small mobile map tooltip */
+    .map-container .animate-slide-in {
+      min-width: 260px;
+      font-size: 0.875rem;
+    }
   }
 
   /* Landscape mobile orientation */
   @media (max-height: 500px) and (orientation: landscape) {
     .modal-content {
       @apply max-h-[95vh] py-2;
+    }
+
+    /* Landscape map tooltip positioning */
+    .map-container .animate-slide-in {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+  }
+
+  /* Tablet-specific map improvements */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .map-container .animate-slide-in {
+      min-width: 320px;
+      max-width: 400px;
+    }
+  }
+
+  /* Desktop map tooltip enhancements */
+  @media (min-width: 1024px) {
+    .map-container .animate-slide-in {
+      min-width: 320px;
+      max-width: 420px;
     }
   }
 
@@ -349,6 +392,29 @@
   }
 }
 
+/* Enhanced map tooltip animations */
+@keyframes mapTooltipEnter {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-100%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-100%) scale(1);
+  }
+}
+
+@keyframes mapTooltipExit {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-100%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-100%) scale(0.9);
+  }
+}
+
 .sparkle {
   position: absolute;
   width: 20px;
@@ -422,7 +488,9 @@ html {
   .kawaii-pet-card,
   .slide-in,
   .animate-slide-in,
-  .animate-pulse-border {
+  .animate-pulse-border,
+  .map-tooltip-enter,
+  .map-tooltip-exit {
     animation: none;
   }
   
