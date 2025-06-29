@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Paw, Home, Award, Star, Medal, Trophy } from 'lucide-react';
+import { Heart, PawPrint as Paw, Home, Award, Star, Medal, Trophy } from 'lucide-react';
 import { formatCurrency } from '../../lib/donationService';
 
 interface DonationImpactCardProps {
