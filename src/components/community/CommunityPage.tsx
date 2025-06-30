@@ -22,7 +22,8 @@ import {
   Calendar,
   CheckCircle,
   AlertTriangle,
-  Home
+  Home,
+  RefreshCw
 } from 'lucide-react';
 import { ForumPost } from '../../types/community';
 import PostView from '../community/PostView';
@@ -109,6 +110,7 @@ const CommunityPage: React.FC = () => {
   const [selectedPost, setSelectedPost] = useState<ForumPost | null>(null);
   const [showCreatePostModal, setShowCreatePostModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>(mockCategories);
 
@@ -118,6 +120,8 @@ const CommunityPage: React.FC = () => {
   }, [selectedCategory, sortBy, searchQuery]);
 
   const loadPosts = async () => {
+    if (refreshing) return;
+    
     setLoading(true);
     setError(null);
     
@@ -159,6 +163,12 @@ const CommunityPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadPosts();
+    setRefreshing(false);
   };
 
   // Apply filters and sorting
@@ -239,7 +249,7 @@ const CommunityPage: React.FC = () => {
 
   const handlePostCreated = () => {
     setShowCreatePostModal(false);
-    loadPosts(); // Reload posts to show the new one
+    handleRefresh(); // Reload posts to show the new one
   };
 
   // Community stats
@@ -325,6 +335,18 @@ const CommunityPage: React.FC = () => {
               <p className="text-red-700">{error}</p>
             </div>
           )}
+
+          {/* Refresh Button */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing || loading}
+              className="px-4 py-2 bg-kawaii-purple/20 hover:bg-kawaii-purple/30 rounded-kawaii transition-colors duration-200 flex items-center gap-2 text-gray-700"
+            >
+              <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
+              {refreshing ? 'Refreshing...' : 'Refresh Posts'}
+            </button>
+          </div>
 
           {/* Forum Posts */}
           <div className="space-y-4">
