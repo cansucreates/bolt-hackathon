@@ -6,8 +6,8 @@ const UserProfile: React.FC = () => {
   const { user, profile, updateProfile, signOut } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    user_name: profile?.user_name || '',
-    avatar_url: profile?.avatar_url || ''
+    user_name: '',
+    avatar_url: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);

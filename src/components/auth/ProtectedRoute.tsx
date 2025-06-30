@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -13,6 +13,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
+
+  // Debug auth state
+  useEffect(() => {
+    console.log('Protected route auth state:', { user: !!user, loading });
+  }, [user, loading]);
 
   if (loading) {
     return (
