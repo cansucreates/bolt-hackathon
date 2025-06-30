@@ -19,6 +19,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   if (!isOpen) return null;
 
@@ -122,14 +123,17 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
       } else {
         console.log('Post created successfully:', result.data);
         // Success - clear form and close modal
-        setTitle('');
-        setContent('');
-        setCategory('');
-        setTags('');
-        setImageFile(null);
-        setImagePreview(null);
-        onPostCreated();
-        onClose();
+        setSubmitSuccess(true);
+        setTimeout(() => {
+          setTitle('');
+          setContent('');
+          setCategory('');
+          setTags('');
+          setImageFile(null);
+          setImagePreview(null);
+          setSubmitSuccess(false);
+          onPostCreated();
+        }, 1500);
       }
     } catch (error) {
       console.error('Unexpected error creating post:', error);
@@ -168,6 +172,14 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
             </div>
           )}
           
+          {/* Success Message */}
+          {submitSuccess && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-kawaii flex items-center gap-2">
+              <div className="text-green-600 flex-shrink-0">✓</div>
+              <p className="text-green-700">Post created successfully!</p>
+            </div>
+          )}
+          
           {/* Title */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -179,7 +191,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
               onChange={(e) => setTitle(e.target.value)}
               placeholder="What's your question about?"
               className={`kawaii-input w-full ${errors.title ? 'border-red-300' : ''}`}
-              disabled={isSubmitting}
+              disabled={isSubmitting || submitSuccess}
             />
             {errors.title && (
               <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
@@ -198,7 +210,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className={`kawaii-input w-full ${errors.category ? 'border-red-300' : ''}`}
-              disabled={isSubmitting}
+              disabled={isSubmitting || submitSuccess}
             >
               <option value="">Select a category</option>
               <option value="health">Pet Health</option>
@@ -226,7 +238,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
               onChange={(e) => setContent(e.target.value)}
               placeholder="Describe your question or topic in detail..."
               className={`kawaii-input w-full h-40 resize-none ${errors.content ? 'border-red-300' : ''}`}
-              disabled={isSubmitting}
+              disabled={isSubmitting || submitSuccess}
             />
             <div className="flex justify-between mt-1">
               {errors.content ? (
@@ -252,7 +264,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
               onChange={(e) => setTags(e.target.value)}
               placeholder="Enter tags separated by commas (e.g., dog, training, puppy)"
               className="kawaii-input w-full"
-              disabled={isSubmitting}
+              disabled={isSubmitting || submitSuccess}
             />
             <p className="text-xs text-gray-500 mt-1">
               Add relevant tags to help others find your post
@@ -276,7 +288,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
                   type="button"
                   onClick={removeImage}
                   className="absolute top-2 right-2 p-1 bg-red-100 hover:bg-red-200 rounded-full transition-colors duration-200"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || submitSuccess}
                 >
                   <X size={16} className="text-red-600" />
                 </button>
@@ -298,7 +310,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
                     accept="image/*"
                     onChange={handleImageChange}
                     className="hidden"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || submitSuccess}
                   />
                 </label>
                 {errors.image && (
@@ -317,19 +329,24 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPo
               type="button"
               onClick={onClose}
               className="flex-1 py-3 px-4 border border-gray-300 rounded-kawaii text-gray-700 font-bold hover:bg-gray-50 transition-colors duration-200"
-              disabled={isSubmitting}
+              disabled={isSubmitting || submitSuccess}
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !user}
+              disabled={isSubmitting || !user || submitSuccess}
               className="flex-1 py-3 px-4 bg-kawaii-purple hover:bg-kawaii-purple-dark disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 font-bold rounded-kawaii transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 shadow-md"
             >
               {isSubmitting ? (
                 <>
                   <div className="w-4 h-4 border-2 border-gray-700 border-t-transparent rounded-full animate-spin"></div>
                   Posting...
+                </>
+              ) : submitSuccess ? (
+                <>
+                  <div className="text-green-600">✓</div>
+                  Posted Successfully!
                 </>
               ) : (
                 <>
