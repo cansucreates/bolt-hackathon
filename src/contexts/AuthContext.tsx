@@ -39,11 +39,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Get initial session
     const getInitialSession = async () => {
       try {
+        setLoading(true);
+        console.log('Getting initial session...');
+        
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error getting session:', error);
         } else {
+          console.log('Initial session:', session ? 'Found' : 'None');
           setSession(session);
           setUser(session?.user ?? null);
           
@@ -65,13 +69,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          await fetchUserProfile(session.user.id);
-        } else {
+        if (event === 'SIGNED_OUT') {
+          // Clear user data on sign out
+          setSession(null);
+          setUser(null);
           setProfile(null);
+          
+          // Clear any persisted session data
+          localStorage.removeItem('supabase.auth.token');
+          
+          console.log('User signed out, session cleared');
+        } else {
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          if (session?.user) {
+            await fetchUserProfile(session.user.id);
+          } else {
+            setProfile(null);
+          }
         }
         
         // Only set loading to false after we've processed the auth change
@@ -81,11 +97,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('Fetching user profile for:', userId);
+      
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -97,6 +117,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
+      console.log('User profile fetched:', data ? 'Success' : 'Not found');
       setProfile(data);
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -203,19 +224,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOut = async () => {
     try {
       setLoading(true);
+      console.log('Signing out user...');
       
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut({
+        scope: 'global' // Ensure we clear all sessions, not just current browser
+      });
 
       if (error) {
+        console.error('Error signing out:', error);
         return { error: { message: error.message, status: 400 } };
       }
 
+      // Manually clear user data
       setUser(null);
       setProfile(null);
       setSession(null);
       
+      // Clear any persisted session data
+      localStorage.removeItem('supabase.auth.token');
+      
+      console.log('User signed out successfully');
       return { error: null };
     } catch (error) {
+      console.error('Unexpected error during sign out:', error);
       return { 
         error: { 
           message: error instanceof Error ? error.message : 'An unexpected error occurred',

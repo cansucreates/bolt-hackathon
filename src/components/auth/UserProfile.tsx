@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Mail, Calendar, Edit3, Save, X, Camera, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -11,6 +11,21 @@ const UserProfile: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Update form data when profile changes
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        user_name: profile.user_name || '',
+        avatar_url: profile.avatar_url || ''
+      });
+    }
+  }, [profile]);
+
+  // Debug auth state
+  useEffect(() => {
+    console.log('Auth state in UserProfile:', { user: !!user, profile });
+  }, [user, profile]);
 
   if (!user || !profile) {
     return (
@@ -49,9 +64,14 @@ const UserProfile: React.FC = () => {
   };
 
   const handleSignOut = async () => {
+    console.log('Sign out clicked from profile page');
     const { error } = await signOut();
     if (error) {
+      console.error('Error signing out from profile:', error);
       setMessage({ type: 'error', text: error.message });
+    } else {
+      console.log('Sign out successful from profile');
+      // The redirect will happen automatically due to the protected route
     }
   };
 
@@ -224,7 +244,7 @@ const UserProfile: React.FC = () => {
           <div className="pt-6 border-t border-gray-200">
             <button
               onClick={handleSignOut}
-              className="w-full py-3 px-4 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-kawaii transition-colors duration-200 flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-kawaii transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
             >
               <LogOut size={18} />
               Sign Out

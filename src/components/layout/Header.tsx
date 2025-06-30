@@ -38,7 +38,7 @@ const Header: React.FC = () => {
         // Clean up URL
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.delete('auth_success');
-        window.history.replaceState({}, '', newUrl.toString());
+        window.history.replaceState({}, document.title, newUrl.toString());
         
         // Clear message after 5 seconds
         setTimeout(() => setAuthMessage(null), 5000);
@@ -47,7 +47,7 @@ const Header: React.FC = () => {
         // Clean up URL
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.delete('auth_error');
-        window.history.replaceState({}, '', newUrl.toString());
+        window.history.replaceState({}, document.title, newUrl.toString());
         
         // Clear message after 5 seconds
         setTimeout(() => setAuthMessage(null), 5000);
@@ -176,7 +176,14 @@ const Header: React.FC = () => {
   };
 
   const handleSignOut = async () => {
-    await signOut();
+    console.log('Sign out clicked');
+    const { error } = await signOut();
+    if (error) {
+      console.error('Error signing out:', error);
+      alert(`Failed to sign out: ${error.message}`);
+    } else {
+      console.log('Sign out successful');
+    }
     closeMenu();
   };
 
@@ -253,6 +260,11 @@ const Header: React.FC = () => {
       }, 150);
     }
   }, [showAuthModal]);
+
+  // Debug auth state
+  useEffect(() => {
+    console.log('Auth state in Header:', { user: !!user, profile: !!profile });
+  }, [user, profile]);
   
   return (
     <>
