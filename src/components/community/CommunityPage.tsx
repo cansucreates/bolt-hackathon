@@ -24,16 +24,16 @@ import {
   AlertTriangle,
   Home
 } from 'lucide-react';
-import { ForumPost } from '../types/community';
-import PostView from './PostView';
+import { ForumPost } from '../../types/community';
+import PostView from '../community/PostView';
 import { useAuth } from '../../contexts/AuthContext';
-import CreatePostModal from './CreatePostModal';
-import PostCreationButton from './PostCreationButton';
+import CreatePostModal from '../community/CreatePostModal';
+import PostCreationButton from '../community/PostCreationButton';
 import { voteOnPost, fetchPosts, togglePostFollow } from '../../lib/communityService';
-import PostList from './PostList';
-import CategorySelector from './CategorySelector';
-import SearchAndFilters from './SearchAndFilters';
-import CommunityStats from './CommunityStats';
+import PostList from '../community/PostList';
+import CategorySelector from '../community/CategorySelector';
+import SearchAndFilters from '../community/SearchAndFilters';
+import CommunityStats from '../community/CommunityStats';
 
 interface Category {
   id: string;
